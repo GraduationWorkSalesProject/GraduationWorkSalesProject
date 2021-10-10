@@ -1,6 +1,5 @@
 package GraduationWorkSalesProject.graduation.com.dto.error;
 
-import GraduationWorkSalesProject.graduation.com.exception.ErrorCode;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.NoArgsConstructor;

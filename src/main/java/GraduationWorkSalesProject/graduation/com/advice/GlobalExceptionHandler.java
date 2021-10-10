@@ -2,7 +2,7 @@ package GraduationWorkSalesProject.graduation.com.advice;
 
 import GraduationWorkSalesProject.graduation.com.dto.error.ErrorResponse;
 import GraduationWorkSalesProject.graduation.com.exception.EmailDuplicationException;
-import GraduationWorkSalesProject.graduation.com.exception.ErrorCode;
+import GraduationWorkSalesProject.graduation.com.dto.error.ErrorCode;
 import GraduationWorkSalesProject.graduation.com.exception.MemberNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

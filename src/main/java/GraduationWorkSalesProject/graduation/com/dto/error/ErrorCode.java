@@ -1,4 +1,4 @@
-package GraduationWorkSalesProject.graduation.com.exception;
+package GraduationWorkSalesProject.graduation.com.dto.error;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
