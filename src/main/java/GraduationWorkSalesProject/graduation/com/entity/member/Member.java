@@ -10,7 +10,6 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
-import javax.validation.constraints.Email;
 import java.time.LocalDateTime;
 
 @Getter
@@ -25,15 +24,14 @@ public class Member {
     @Column(name = "member_id", updatable = false)
     private Long id;
 
-    @Email
     @Column(name = "member_email", unique = true)
     private String email;
 
     @Column(name = "member_password")
     private String password;
 
-    @Column(name = "member_nickname")
-    private String nickname;
+    @Column(name = "member_username")
+    private String username;
 
     @Column(name = "member_phone_number")
     private String phoneNumber;
@@ -67,13 +65,13 @@ public class Member {
     private Image image;
 
     @Builder
-    public Member(String email, String password, String nickname, String phoneNumber,
+    public Member(String email, String password, String username, String phoneNumber,
                   String address, String detailAddress, String postcode) {
         this.email = email;
         this.password = password;
-        this.nickname = nickname;
+        this.username = username;
         this.phoneNumber = phoneNumber;
-        this.role = MemberRole.BASIC;
+        this.role = MemberRole.ROLE_USER;
         this.certificationStatus = MemberCertificationStatus.UNCERTIFIED;
         this.address = new Address(address, detailAddress, postcode);
         // TODO: 2021. 10. 5.
@@ -81,5 +79,9 @@ public class Member {
         //  이미지 저장소에 기본 이미지 저장 필요
         //  이미지 타입 논의 필요
         this.image = new Image("init image", "init uuid", "jpg");
+    }
+
+    public void encryptPassword(String encryptedPassword) {
+        this.password = encryptedPassword;
     }
 }
