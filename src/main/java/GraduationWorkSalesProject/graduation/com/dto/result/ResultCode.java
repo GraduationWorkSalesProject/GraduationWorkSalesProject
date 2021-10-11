@@ -1,4 +1,4 @@
-package GraduationWorkSalesProject.graduation.com.dto;
+package GraduationWorkSalesProject.graduation.com.dto.result;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

@@ -1,8 +1,8 @@
 package GraduationWorkSalesProject.graduation.com.controller;
 
 import GraduationWorkSalesProject.graduation.com.config.JwtTokenUtil;
-import GraduationWorkSalesProject.graduation.com.dto.ResultCode;
-import GraduationWorkSalesProject.graduation.com.dto.ResultResponse;
+import GraduationWorkSalesProject.graduation.com.dto.result.ResultCode;
+import GraduationWorkSalesProject.graduation.com.dto.result.ResultResponse;
 import GraduationWorkSalesProject.graduation.com.dto.member.MemberLoginDTO;
 import GraduationWorkSalesProject.graduation.com.dto.member.MemberEmailCheckDTO;
 import GraduationWorkSalesProject.graduation.com.dto.member.MemberJoinDTO;
@@ -34,7 +34,7 @@ public class MemberController {
 
         return ResponseEntity.ok()
                 .header("Authorization", token)
-                .body(new ResultResponse(ResultCode.LOGIN_SUCCESS));
+                .body(new ResultResponse(ResultCode.LOGIN_SUCCESS, null));
     }
 
     @PostMapping("/overlap")
@@ -42,14 +42,14 @@ public class MemberController {
         Optional<Member> findMember = memberService.findOneByEmail(memberEmailCheckDTO.getEmail());
         ResultCode resultCode = (findMember.isEmpty() ? ResultCode.EMAIL_VALID : ResultCode.EMAIL_DUPLICATION);
 
-        return ResponseEntity.ok(new ResultResponse(resultCode));
+        return ResponseEntity.ok(new ResultResponse(resultCode, null));
     }
 
     @PostMapping("/join")
     public ResponseEntity<ResultResponse> join(@Validated MemberJoinDTO memberJoinDTO) {
         memberService.save(memberJoinDTO);
 
-        return ResponseEntity.ok(new ResultResponse(ResultCode.JOIN_SUCCESS));
+        return ResponseEntity.ok(new ResultResponse(ResultCode.JOIN_SUCCESS, null));
     }
 
     @DeleteMapping("/leave")
@@ -58,6 +58,6 @@ public class MemberController {
         String email = jwtTokenUtil.getUsernameFromToken(jwtToken);
         memberService.removeByEmail(email);
 
-        return ResponseEntity.ok(new ResultResponse(ResultCode.LEAVE_SUCCESS));
+        return ResponseEntity.ok(new ResultResponse(ResultCode.LEAVE_SUCCESS, null));
     }
 }
