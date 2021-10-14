@@ -1,7 +1,7 @@
 package GraduationWorkSalesProject.graduation.com.advice;
 
 import GraduationWorkSalesProject.graduation.com.dto.error.ErrorResponse;
-import GraduationWorkSalesProject.graduation.com.exception.EmailDuplicationException;
+import GraduationWorkSalesProject.graduation.com.exception.JoinInvalidInputException;
 import GraduationWorkSalesProject.graduation.com.dto.error.ErrorCode;
 import GraduationWorkSalesProject.graduation.com.exception.MemberNotFoundException;
 import org.springframework.http.HttpStatus;
@@ -15,7 +15,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler
     protected ResponseEntity<ErrorResponse> handleMethodArgumentNotValidExceptionHandler(BindException e) {
-        ErrorResponse response = ErrorResponse.of(ErrorCode.INVALID_INPUT_VALUE, e.getBindingResult());
+        ErrorResponse response = ErrorResponse.of(ErrorCode.ARGUMENT_INPUT_INVALID, e.getBindingResult());
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
@@ -26,8 +26,8 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler
-    protected ResponseEntity<ErrorResponse> emailDuplicationExceptionHandler(EmailDuplicationException e) {
-        ErrorResponse response = ErrorResponse.of(ErrorCode.EMAIL_DUPLICATION);
+    protected ResponseEntity<ErrorResponse> joinInputDuplicationExceptionHandler(JoinInvalidInputException e) {
+        ErrorResponse response = ErrorResponse.of(ErrorCode.JOIN_INPUT_DUPLICATION);
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 

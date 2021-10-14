@@ -27,7 +27,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        String email = null;
+        String username = null;
         String jwtToken = null;
         String requestTokenHeader = request.getHeader("Authorization");
         log.debug("[Token] {}", requestTokenHeader);
@@ -35,7 +35,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         if (requestTokenHeader != null && requestTokenHeader.startsWith("Bearer ")) {
             jwtToken = requestTokenHeader.substring(7);
             try {
-                email = jwtTokenUtil.getUsernameFromToken(jwtToken);
+                username = jwtTokenUtil.getUsernameFromToken(jwtToken);
             } catch (IllegalArgumentException e) {
                 log.warn("Unable to get JWT Token");
             } catch (ExpiredJwtException e) {
@@ -45,8 +45,8 @@ public class JwtRequestFilter extends OncePerRequestFilter {
             log.warn("JWT Token does not begin with Bearer String");
         }
 
-        if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            UserDetails userDetails = this.jwtUserDetailsService.loadUserByUsername(email);
+        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+            UserDetails userDetails = this.jwtUserDetailsService.loadUserByUsername(username);
 
             if (jwtTokenUtil.validateToken(jwtToken, userDetails)) {
                 UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken =
