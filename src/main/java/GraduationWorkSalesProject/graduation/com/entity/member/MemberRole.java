@@ -1,5 +1,5 @@
 package GraduationWorkSalesProject.graduation.com.entity.member;
 
 public enum MemberRole {
-    BASIC, SELLER, ADMIN
+    ROLE_USER, ROLE_SELLER, ROLE_ADMIN
 }
