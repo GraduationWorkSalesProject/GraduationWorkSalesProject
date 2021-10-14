@@ -28,3 +28,4 @@ public class Application {
 		return () -> Optional.of(UUID.randomUUID().toString());
 	}
 }
+
