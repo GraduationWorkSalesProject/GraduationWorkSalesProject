@@ -30,6 +30,9 @@ public class Member {
     @Column(name = "member_password")
     private String password;
 
+    @Column(name = "member_userid")
+    private String userid;
+
     @Column(name = "member_username")
     private String username;
 
@@ -65,8 +68,9 @@ public class Member {
     private Image image;
 
     @Builder
-    public Member(String email, String password, String username, String phoneNumber,
+    public Member(String userid, String email, String password, String username, String phoneNumber,
                   String address, String detailAddress, String postcode) {
+        this.userid = userid;
         this.email = email;
         this.password = password;
         this.username = username;
