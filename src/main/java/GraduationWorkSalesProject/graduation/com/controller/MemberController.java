@@ -82,9 +82,9 @@ public class MemberController {
         }
         certificationRedisService.delete(certification.getToken());
 
-        Certificate certificate = Certificate.create(request.getToken());
+        Certificate certificate = Certificate.create();
         certificateRedisService.save(certificate);
-        CertificateResponse response = new CertificateResponse(certificate.getCertificate(), certificate.getExpirationDateTime());
+        CertificateResponse response = new CertificateResponse(certificate.getToken(), certificate.getExpirationDateTime());
 
         return ResponseEntity.ok(ResultResponse.of(CERTIFY_EMAIL_SUCCESS, response));
     }

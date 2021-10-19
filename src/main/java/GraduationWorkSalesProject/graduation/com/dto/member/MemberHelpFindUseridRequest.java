@@ -5,10 +5,10 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.validator.constraints.Length;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.Pattern;
 
 @ApiModel(description = "회원 아이디 찾기 데이터 모델")
 @Getter
@@ -21,7 +21,7 @@ public class MemberHelpFindUseridRequest {
     String email;
 
     @ApiModelProperty(value = "인증 토큰", example = "wjRMbgPxtlKklzV2", required = true)
-    @Pattern(regexp = "^[A-Za-z0-9]{16}$", message = "인증 토큰은 숫자, 문자로 구성된 16자리여야 합니다.")
+    @Length(min = 16, max = 16, message = "인증 토큰은 16자리입니다.")
     @NotEmpty(message = "인증 토큰은 필수입니다.")
     private String token;
 }

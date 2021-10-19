@@ -52,7 +52,7 @@ public class MemberJoinRequest {
     private String postcode;
 
     @ApiParam(value = "인증 토큰(hidden)", example = "wjRMbgPxtlKklzV2", required = true)
-    @Pattern(regexp = "^[A-Za-z0-9]{16}$", message = "인증 토큰은 숫자, 문자로 구성된 16자리여야 합니다.")
+    @Length(min = 16, max = 16, message = "인증 토큰은 16자리입니다.")
     @NotEmpty(message = "인증 토큰은 필수입니다.")
     private String token;
 
