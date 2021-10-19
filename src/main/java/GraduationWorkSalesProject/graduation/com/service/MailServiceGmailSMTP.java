@@ -1,6 +1,5 @@
 package GraduationWorkSalesProject.graduation.com.service;
 
-import GraduationWorkSalesProject.graduation.com.dto.mail.MailDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -12,12 +11,12 @@ public class MailServiceGmailSMTP implements MailService {
 
     private final JavaMailSender mailSender;
 
-    public void sendMail(MailDTO mailDTO) {
+    public void sendMail(String receiver, String subject, String body) {
         SimpleMailMessage message = new SimpleMailMessage();
-        message.setTo(mailDTO.getReceiver());
+        message.setTo(receiver);
         message.setFrom(SENDER_GRADU);
-        message.setSubject(mailDTO.getSubject());
-        message.setText(mailDTO.getBody());
+        message.setSubject(subject);
+        message.setText(body);
 
         mailSender.send(message);
     }

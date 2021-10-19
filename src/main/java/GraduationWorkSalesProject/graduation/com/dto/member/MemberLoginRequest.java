@@ -1,16 +1,14 @@
 package GraduationWorkSalesProject.graduation.com.dto.member;
 
 import io.swagger.annotations.ApiParam;
-import lombok.AccessLevel;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Pattern;
 
-@Data
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class MemberLoginDTO {
+@Getter
+@AllArgsConstructor
+public class MemberLoginRequest {
 
     @ApiParam(value = "아이디", example = "example123", required = true)
     @NotEmpty(message = "아이디를 입력해주세요.")

@@ -2,24 +2,23 @@ package GraduationWorkSalesProject.graduation.com.dto.member;
 
 import GraduationWorkSalesProject.graduation.com.entity.member.Member;
 import io.swagger.annotations.ApiParam;
-import lombok.AccessLevel;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 import org.hibernate.validator.constraints.Length;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Pattern;
 
-@Data
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class MemberJoinDTO {
+@Getter
+@AllArgsConstructor
+public class MemberJoinRequest {
 
     @ApiParam(value = "아이디", example = "example123", required = true)
     @NotEmpty(message = "아이디를 입력해주세요.")
     private String userid;
 
-    @ApiParam(value = "이메일", example = "example@google.com", required = true)
+    @ApiParam(value = "이메일", example = "example@gmail.com", required = true)
     @Email(message = "이메일 형식이 잘못되었습니다.")
     @NotEmpty(message = "이메일을 입력해주세요.")
     private String email;
@@ -51,6 +50,11 @@ public class MemberJoinDTO {
     @ApiParam(value = "우편번호", example = "30872", required = true)
     @NotEmpty(message = "우편번호를 입력해주세요.")
     private String postcode;
+
+    @ApiParam(value = "인증 토큰(hidden)", example = "wjRMbgPxtlKklzV2", required = true)
+    @Pattern(regexp = "^[A-Za-z0-9]{16}$", message = "인증 토큰은 숫자, 문자로 구성된 16자리여야 합니다.")
+    @NotEmpty(message = "인증 토큰은 필수입니다.")
+    private String token;
 
     public Member convert() {
         return Member.builder()

@@ -1,9 +1,11 @@
 package GraduationWorkSalesProject.graduation.com.service;
 
-import GraduationWorkSalesProject.graduation.com.dto.member.MemberJoinDTO;
+import GraduationWorkSalesProject.graduation.com.dto.member.MemberHelpFindPasswordRequest;
+import GraduationWorkSalesProject.graduation.com.dto.member.MemberJoinRequest;
 import GraduationWorkSalesProject.graduation.com.entity.member.Member;
 import GraduationWorkSalesProject.graduation.com.exception.JoinInvalidInputException;
-import GraduationWorkSalesProject.graduation.com.exception.MemberNotFoundException;
+import GraduationWorkSalesProject.graduation.com.exception.LoginInvalidInputException;
+import GraduationWorkSalesProject.graduation.com.exception.PasswordNotMatchException;
 import GraduationWorkSalesProject.graduation.com.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -21,35 +23,45 @@ public class MemberService {
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
     @Transactional
-    public void save(MemberJoinDTO memberJoinDTO) {
-        checkJoinInputsWereVerified(memberJoinDTO);
+    public void save(MemberJoinRequest memberJoinRequest) {
+        checkJoinInputsWereVerified(memberJoinRequest);
 
-        Member member = memberJoinDTO.convert();
+        Member member = memberJoinRequest.convert();
         member.encryptPassword(bCryptPasswordEncoder.encode(member.getPassword()));
         memberRepository.save(member);
     }
 
-    private void checkJoinInputsWereVerified(MemberJoinDTO memberJoinDTO) {
-        memberRepository.findByUserid(memberJoinDTO.getUserid()).ifPresent(member -> {
+    private void checkJoinInputsWereVerified(MemberJoinRequest memberJoinRequest) {
+        memberRepository.findByUserid(memberJoinRequest.getUserid()).ifPresent(member -> {
             throw new JoinInvalidInputException();
         });
-        memberRepository.findByUsername(memberJoinDTO.getUsername()).ifPresent(member -> {
+        memberRepository.findByUsername(memberJoinRequest.getUsername()).ifPresent(member -> {
             throw new JoinInvalidInputException();
         });
-        memberRepository.findByEmail(memberJoinDTO.getEmail()).ifPresent(member -> {
+        memberRepository.findByEmail(memberJoinRequest.getEmail()).ifPresent(member -> {
             throw new JoinInvalidInputException();
         });
+    }
+
+    @Transactional
+    public void changePassword(MemberHelpFindPasswordRequest request) {
+        Member findMember = memberRepository.findByUserid(request.getUserid()).get();
+        if (!request.getNewPassword().equals(request.getCheckPassword())) {
+            throw new PasswordNotMatchException();
+        }
+
+        findMember.encryptPassword(bCryptPasswordEncoder.encode(request.getNewPassword()));
     }
 
     public void checkUseridPassword(String userid, String password) {
         Optional<Member> findMember = memberRepository.findByUserid(userid);
         if(findMember.isEmpty() || !bCryptPasswordEncoder.matches(password, findMember.get().getPassword())){
-            throw new MemberNotFoundException();
+            throw new LoginInvalidInputException();
         }
     }
 
-    public Optional<Member> findOneByEmail(String userid){
-        return memberRepository.findByUserid(userid);
+    public Optional<Member> findOneByEmail(String email){
+        return memberRepository.findByEmail(email);
     }
 
     public Optional<Member> findOneByUserid(String userid) {

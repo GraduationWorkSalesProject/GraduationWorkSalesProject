@@ -1,18 +1,20 @@
 package GraduationWorkSalesProject.graduation.com.dto.member;
 
-import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.AccessLevel;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
 
-@Data
+@ApiModel(value = "회원 이메일 중복 체크 데이터 모델")
+@Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class MemberEmailCheckDTO {
+public class MemberEmailCheckRequest {
 
-    @ApiParam(value = "이메일", example = "example@google.com", required = true)
+    @ApiModelProperty(value = "이메일", example = "example@gmail.com", required = true)
     @Email(message = "이메일 형식이 잘못되었습니다.")
     @NotEmpty(message = "이메일을 입력해주세요.")
     String email;
