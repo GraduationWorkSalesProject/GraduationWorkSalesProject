@@ -17,7 +17,10 @@ public enum ResultCode {
     SEND_MAIL_SUCCESS(200, "M106", "메일 전송이 완료되었습니다."),
     EMAIL_DUPLICATION(200, "M107", "이미 사용중인 이메일입니다."),
     USERID_DUPLICATION(200, "M108", "이미 사용중인 아이디입니다."),
-    USERNAME_DUPLICATION(200, "M109", "이미 사용중인 닉네임입니다.")
+    USERNAME_DUPLICATION(200, "M109", "이미 사용중인 닉네임입니다."),
+    FIND_USERID_SUCCESS(200, "M110", "회원 아이디 찾기 성공"),
+    CHANGE_PASSWORD_SUCCESS(200, "M111", "회원 비밀번호 변경 성공"),
+    CERTIFY_EMAIL_SUCCESS(200, "M112", "회원 이메일 인증 성공")
     ;
 
     private int status;
