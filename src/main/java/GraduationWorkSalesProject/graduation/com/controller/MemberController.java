@@ -75,8 +75,11 @@ public class MemberController {
     @ApiOperation(value = "인증 코드 검증")
     @PostMapping(value = "/verification/code", consumes = APPLICATION_JSON_VALUE)
     public ResponseEntity<ResultResponse> verifyCertificationCode(@Validated @RequestBody MemberCertificationCodeRequest request) {
-        Certification certification = certificationRedisService.findOne(request.getToken()).get();
-
+        Optional<Certification> findCertification = certificationRedisService.findOne(request.getToken());
+        if(findCertification.isEmpty()){
+            throw new ExpiredCertificationCodeException();
+        }
+        Certification certification = findCertification.get();
         if(!certification.getCertificationCode().equals(request.getCertificationCode())){
             throw new CertificationCodeNotMatchException();
         }

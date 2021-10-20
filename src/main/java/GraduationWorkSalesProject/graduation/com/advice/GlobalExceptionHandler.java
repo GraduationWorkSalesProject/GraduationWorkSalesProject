@@ -66,6 +66,12 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler
+    protected ResponseEntity<ErrorResponse> expiredCertificationCodeExceptionHandler(ExpiredCertificationCodeException e) {
+        final ErrorResponse response = ErrorResponse.of(EXPIRED_CERTIFICATION_CODE);
+        return new ResponseEntity<>(response, BAD_REQUEST);
+    }
+
+    @ExceptionHandler
     protected ResponseEntity<ErrorResponse> handleException(Exception e) {
         ErrorResponse response = ErrorResponse.of(INTERNAL_SERVER_ERROR);
         return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);

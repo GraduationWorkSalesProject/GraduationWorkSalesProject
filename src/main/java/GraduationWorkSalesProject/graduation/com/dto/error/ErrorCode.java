@@ -19,7 +19,8 @@ public enum ErrorCode {
     CERTIFICATION_CODE_NOT_MATCH(400, "M004", "잘못된 인증 코드입니다."),
     INVALID_CERTIFICATE(400, "M005", "유효하지 않은 인증서입니다."),
     EMAIL_NOT_EXIST(400, "M006", "해당 이메일로 가입한 회원은 존재하지 않습니다"),
-    USERID_NOT_EXIST(400, "M007", "해당 아이디는 존재하지 않습니다")
+    USERID_NOT_EXIST(400, "M007", "해당 아이디는 존재하지 않습니다"),
+    EXPIRED_CERTIFICATION_CODE(400, "M005", "만료된 인증 코드입니다."),
     ;
 
     private int status;
