@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Pattern;
 
-@ApiModel(value = "회원 인증 코드 데이터 모델", description = "인증 토큰은 Front단에서 숫자, 문자로 구성된 16자리 난수를 만들어서 전달해주세요.")
+@ApiModel(description = "회원 인증 코드 데이터 모델")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class MemberCertificationCodeRequest {

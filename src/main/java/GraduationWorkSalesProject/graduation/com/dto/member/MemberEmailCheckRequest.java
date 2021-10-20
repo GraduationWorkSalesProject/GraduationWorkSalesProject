@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
 
-@ApiModel(value = "회원 이메일 중복 체크 데이터 모델")
+@ApiModel(description = "회원 이메일 중복 체크 데이터 모델")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class MemberEmailCheckRequest {

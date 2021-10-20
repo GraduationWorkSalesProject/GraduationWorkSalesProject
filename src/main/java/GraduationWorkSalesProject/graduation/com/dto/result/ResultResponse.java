@@ -4,7 +4,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Getter;
 
-@ApiModel(value = "결과 응답 데이터 모델")
+@ApiModel(description = "결과 응답 데이터 모델")
 @Getter
 public class ResultResponse {
 

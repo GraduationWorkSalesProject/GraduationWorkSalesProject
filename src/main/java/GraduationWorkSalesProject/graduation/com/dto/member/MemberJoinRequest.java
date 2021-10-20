@@ -15,6 +15,7 @@ import javax.validation.constraints.Pattern;
 public class MemberJoinRequest {
 
     @ApiParam(value = "아이디", example = "example123", required = true)
+    @Pattern(regexp = "^[a-z0-9+]{5,20}$", message = "아이디는 5~20자의 영소문자, 숫자만 사용 가능합니다.")
     @NotEmpty(message = "아이디를 입력해주세요.")
     private String userid;
 
