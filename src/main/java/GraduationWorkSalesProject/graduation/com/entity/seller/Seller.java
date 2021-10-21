@@ -2,15 +2,12 @@ package GraduationWorkSalesProject.graduation.com.entity.seller;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.EntityListeners;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
-
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import GraduationWorkSalesProject.graduation.com.entity.member.Member;
 import lombok.AccessLevel;
@@ -20,7 +17,6 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@EntityListeners(AuditingEntityListener.class)
 @Table(name = "sellers")
 @Entity
 public class Seller {
