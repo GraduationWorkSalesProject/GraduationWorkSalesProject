@@ -1,16 +1,13 @@
 package GraduationWorkSalesProject.graduation.com.dto.error;
 
-import lombok.AccessLevel;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.Getter;
 import org.springframework.validation.BindingResult;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Data
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Getter
 public class ErrorResponse {
 
     private int status;
@@ -44,8 +41,7 @@ public class ErrorResponse {
         return new ErrorResponse(code, errors);
     }
 
-    @Data
-    @NoArgsConstructor(access = AccessLevel.PROTECTED)
+    @Getter
     public static class FieldError {
         private String field;
         private String value;
