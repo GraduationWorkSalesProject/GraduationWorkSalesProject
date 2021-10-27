@@ -48,8 +48,8 @@ public class MemberController {
     private final CertificateService certificateService;
 
     @ApiOperation(value = "로그인", notes = "로그인 성공 시, JWT 토큰을 Response Header(Authorization)에 넣어서 반환합니다")
-    @PostMapping(value = "/login", consumes = APPLICATION_FORM_URLENCODED_VALUE)
-    public ResponseEntity<ResultResponse> login(@Validated @ModelAttribute MemberLoginRequest request) {
+    @PostMapping(value = "/login", consumes = APPLICATION_JSON_VALUE)
+    public ResponseEntity<ResultResponse> login(@Validated @RequestBody MemberLoginRequest request) {
         memberService.checkUseridPassword(request.getUserid(), request.getPassword());
         UserDetails userDetails = userDetailsService.loadUserByUsername(request.getUserid());
         String token = jwtTokenUtil.generateToken(userDetails);
@@ -132,8 +132,8 @@ public class MemberController {
     }
 
     @ApiOperation(value = "회원가입")
-    @PostMapping(value = "/join", consumes = APPLICATION_FORM_URLENCODED_VALUE)
-    public ResponseEntity<ResultResponse> join(@Validated @ModelAttribute MemberJoinRequest request) throws ParseException {
+    @PostMapping(value = "/join", consumes = APPLICATION_JSON_VALUE)
+    public ResponseEntity<ResultResponse> join(@Validated @RequestBody MemberJoinRequest request) throws ParseException {
         validateCertificate(request);
 
         memberService.save(request);
