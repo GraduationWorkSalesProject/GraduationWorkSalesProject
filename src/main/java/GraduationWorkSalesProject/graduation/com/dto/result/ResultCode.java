@@ -7,6 +7,9 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum ResultCode {
 
+    // Common
+    REISSUE_SUCCESS(200,"C100", "Access Token 재발급 성공"),
+
     // Member
     LOGIN_SUCCESS(200, "M100", "로그인에 성공하였습니다."),
     EMAIL_VALID(200, "M101", "사용 가능한 이메일입니다."),

@@ -8,9 +8,14 @@ import lombok.Getter;
 public enum ErrorCode {
 
     // Common
+    INTERNAL_SERVER_ERROR(500, "C000", "내부 서버 오류입니다."),
     ARGUMENT_INPUT_INVALID(400, "C001", "유효하지 않은 입력입니다."),
-    UNAUTHORIZED(401, "C002", "인증되지 않은 사용자입니다."),
-    INTERNAL_SERVER_ERROR(500, "C002", "내부 서버 오류입니다."),
+    EXPIRED_ACCESS_TOKEN(401, "C002", "만료된 Access Token입니다."),
+    EXPIRED_REFRESH_TOKEN(401, "C003", "만료된 Refresh Token입니다."),
+    INVALID_TOKEN(401, "C004", "유효하지 않은 토큰입니다."),
+    INVALID_AUTHORIZATION_HEADER(400, "C005", "유효하지 않은 인증 헤더입니다."),
+    REFRESH_TOKEN_NOT_MATCH(400, "C006", "Refresh Token이 일치하지 않습니다."),
+    SIGNATURE_NOT_MATCH(400, "C006", "JWT의 Signature이 일치하지 않습니다."),
 
     // Member
     LOGIN_INPUT_INVALID(400, "M001", "아이디 또는 비밀번호가 일치하지 않습니다."),

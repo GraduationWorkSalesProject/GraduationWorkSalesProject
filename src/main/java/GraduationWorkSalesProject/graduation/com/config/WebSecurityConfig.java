@@ -61,7 +61,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .authorizeRequests()
                 .requestMatchers(CorsUtils::isPreFlightRequest).permitAll()
                 .antMatchers("/", "/login", "/join", "/overlap/**", "/verification/**",
-                        "/swagger-resources/**", "/swagger-ui/**", "/help/**").permitAll()
+                        "/swagger-resources/**", "/swagger-ui/**", "/help/**", "/reissue").permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .exceptionHandling().authenticationEntryPoint(jwtAuthenticationEntryPoint)

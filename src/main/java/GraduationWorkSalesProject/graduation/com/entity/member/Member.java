@@ -67,6 +67,9 @@ public class Member {
     })
     private Image image;
 
+    @Column(name = "member_refresh_token")
+    private String refreshToken = null;
+
     @Builder
     public Member(String userid, String email, String password, String username, String phoneNumber,
                   String address, String detailAddress, String postcode) {
@@ -87,5 +90,9 @@ public class Member {
 
     public void encryptPassword(String encryptedPassword) {
         this.password = encryptedPassword;
+    }
+
+    public void updateRefreshToken(String refreshToken) {
+        this.refreshToken = refreshToken;
     }
 }
