@@ -30,12 +30,12 @@ import java.util.Optional;
 import static GraduationWorkSalesProject.graduation.com.dto.result.ResultCode.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
-// TODO: 만료된 인증 코드 모두 제거하는 로직 -> 어느 메소드에 추가할 지 고민 필요
-//  Redis -> heroku or aws에서 연동하는 방법 찾기
+// TODO:
+//  1. 만료된 인증 코드 모두 제거하는 로직 -> 회원가입, ID/PW 찾기 메소드에 동적 쿼리 추가 필요
+//  2. Redis -> heroku or aws에서 연동하는 방법 찾기
 
 @Api(tags = "회원 API")
 @Slf4j
-@CrossOrigin
 @RestController
 @RequiredArgsConstructor
 public class MemberController {
