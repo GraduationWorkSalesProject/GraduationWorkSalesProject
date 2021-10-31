@@ -1,6 +1,7 @@
 package GraduationWorkSalesProject.graduation.com.dto.seller;
 
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 
 @AllArgsConstructor
 @Getter

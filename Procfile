@@ -1,0 +1,1 @@
+web: java -Dserver.port=$PORT $JAVA_OPTS -jar graduation.com-0.0.1-SNAPSHOT.jar
