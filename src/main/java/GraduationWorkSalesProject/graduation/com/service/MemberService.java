@@ -1,13 +1,16 @@
 package GraduationWorkSalesProject.graduation.com.service;
 
+import GraduationWorkSalesProject.graduation.com.config.JwtTokenUtil;
 import GraduationWorkSalesProject.graduation.com.dto.member.MemberHelpFindPasswordRequest;
 import GraduationWorkSalesProject.graduation.com.dto.member.MemberJoinRequest;
+import GraduationWorkSalesProject.graduation.com.dto.member.MemberLoginRequest;
 import GraduationWorkSalesProject.graduation.com.entity.member.Member;
 import GraduationWorkSalesProject.graduation.com.exception.JoinInvalidInputException;
 import GraduationWorkSalesProject.graduation.com.exception.LoginInvalidInputException;
 import GraduationWorkSalesProject.graduation.com.exception.PasswordNotMatchException;
 import GraduationWorkSalesProject.graduation.com.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,6 +24,7 @@ public class MemberService {
 
     private final MemberRepository memberRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
+    private final JwtTokenUtil jwtTokenUtil;
 
     @Transactional
     public void save(MemberJoinRequest memberJoinRequest) {
@@ -77,5 +81,15 @@ public class MemberService {
     @Transactional
     public void removeOneByUsername(String username) {
         memberRepository.deleteByUsername(username);
+    }
+
+    @Transactional
+    public String updateRefreshToken(MemberLoginRequest request, UserDetails userDetails) {
+        Member member = memberRepository.findByUserid(request.getUserid()).get();
+        if (member.getRefreshToken() == null || !jwtTokenUtil.validateRefreshToken(member.getRefreshToken())) {
+            String refreshToken = jwtTokenUtil.generateRefreshToken(userDetails);
+            member.updateRefreshToken(refreshToken);
+        }
+        return member.getRefreshToken();
     }
 }

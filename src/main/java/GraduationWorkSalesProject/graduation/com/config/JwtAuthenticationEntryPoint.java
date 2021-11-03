@@ -21,11 +21,12 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
     //  https://sas-study.tistory.com/362 참고
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException, ServletException {
+        ErrorCode errorCode = (ErrorCode) request.getAttribute("errorCode");
+        response.setStatus(errorCode.getStatus());
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         try (OutputStream os = response.getOutputStream()){
             ObjectMapper objectMapper = new ObjectMapper();
-            objectMapper.writeValue(os, ErrorResponse.of(ErrorCode.UNAUTHORIZED));
+            objectMapper.writeValue(os, ErrorResponse.of(errorCode));
             os.flush();
         }
     }
