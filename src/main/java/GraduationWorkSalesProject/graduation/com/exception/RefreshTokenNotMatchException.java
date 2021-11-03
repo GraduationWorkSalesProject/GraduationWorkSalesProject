@@ -1,7 +1,9 @@
 package GraduationWorkSalesProject.graduation.com.exception;
 
-public class RefreshTokenNotMatchException extends RuntimeException {
+import GraduationWorkSalesProject.graduation.com.dto.error.ErrorCode;
+
+public class RefreshTokenNotMatchException extends BusinessException {
     public RefreshTokenNotMatchException() {
-        super();
+        super(ErrorCode.REFRESH_TOKEN_NOT_MATCH);
     }
 }

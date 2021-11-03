@@ -1,7 +1,9 @@
 package GraduationWorkSalesProject.graduation.com.exception;
 
-public class InvalidCertificateException extends RuntimeException {
+import GraduationWorkSalesProject.graduation.com.dto.error.ErrorCode;
+
+public class InvalidCertificateException extends BusinessException {
     public InvalidCertificateException() {
-        super();
+        super(ErrorCode.INVALID_CERTIFICATE);
     }
 }
