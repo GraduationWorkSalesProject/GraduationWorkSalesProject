@@ -29,9 +29,9 @@ public class Certification {
     @Column(name = "certificate_code")
     private String certificationCode;
     @Column(name = "certificate_expiration_date")
-    private String expirationDateTime;
+    private LocalDateTime expirationDateTime;
 
-    private Certification(String certificationCode, String expirationDateTime, String token) {
+    private Certification(String certificationCode, LocalDateTime expirationDateTime, String token) {
         this.certificationCode = certificationCode;
         this.expirationDateTime = expirationDateTime;
         this.token = token;
@@ -40,7 +40,7 @@ public class Certification {
     public static Certification create(String token){
         return new Certification(
                 Integer.toString(ThreadLocalRandom.current().nextInt(100000, 1000000)),
-                ZonedDateTime.now(ZoneId.of("Asia/Seoul")).plusMinutes(3).format(DateTimeFormatter.ofPattern("yyyy.MM.dd. HH:mm:ss")),
+                ZonedDateTime.now(ZoneId.of("Asia/Seoul")).plusMinutes(3).toLocalDateTime(),
                 token);
     }
 }
