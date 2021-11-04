@@ -1,7 +1,9 @@
 package GraduationWorkSalesProject.graduation.com.exception;
 
-public class JoinInvalidInputException extends RuntimeException {
+import GraduationWorkSalesProject.graduation.com.dto.error.ErrorCode;
+
+public class JoinInvalidInputException extends BusinessException {
     public JoinInvalidInputException() {
-        super();
+        super(ErrorCode.JOIN_INPUT_DUPLICATION);
     }
 }

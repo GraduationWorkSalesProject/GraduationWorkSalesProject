@@ -2,6 +2,7 @@ package GraduationWorkSalesProject.graduation.com.dto.error;
 
 import lombok.Getter;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,6 +40,12 @@ public class ErrorResponse {
 
     public static ErrorResponse of(final ErrorCode code, final List<FieldError> errors) {
         return new ErrorResponse(code, errors);
+    }
+
+    public static ErrorResponse of(MethodArgumentTypeMismatchException e) {
+        final String value = e.getValue() == null ? "" : e.getValue().toString();
+        final List<ErrorResponse.FieldError> errors = ErrorResponse.FieldError.of(e.getName(), value, e.getErrorCode());
+        return new ErrorResponse(ErrorCode.INVALID_TYPE_VALUE, errors);
     }
 
     @Getter

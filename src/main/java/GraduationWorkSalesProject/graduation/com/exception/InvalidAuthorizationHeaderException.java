@@ -1,7 +1,9 @@
 package GraduationWorkSalesProject.graduation.com.exception;
 
-public class InvalidAuthorizationHeaderException extends RuntimeException {
+import GraduationWorkSalesProject.graduation.com.dto.error.ErrorCode;
+
+public class InvalidAuthorizationHeaderException extends BusinessException {
     public InvalidAuthorizationHeaderException() {
-        super();
+        super(ErrorCode.INVALID_AUTHORIZATION_HEADER);
     }
 }

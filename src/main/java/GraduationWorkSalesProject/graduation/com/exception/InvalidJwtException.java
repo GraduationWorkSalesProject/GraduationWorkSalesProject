@@ -1,7 +1,9 @@
 package GraduationWorkSalesProject.graduation.com.exception;
 
-public class InvalidJwtException extends RuntimeException {
+import GraduationWorkSalesProject.graduation.com.dto.error.ErrorCode;
+
+public class InvalidJwtException extends BusinessException {
     public InvalidJwtException() {
-        super();
+        super(ErrorCode.INVALID_TOKEN);
     }
 }
