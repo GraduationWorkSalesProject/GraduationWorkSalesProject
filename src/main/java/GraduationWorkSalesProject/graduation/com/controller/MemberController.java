@@ -22,9 +22,9 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 
 import static GraduationWorkSalesProject.graduation.com.dto.result.ResultCode.*;
@@ -49,7 +49,8 @@ public class MemberController {
     @ApiOperation(value = "로그인", notes = "로그인 성공 시, JWT 토큰을 Response Header에 넣어서 반환합니다")
     @PostMapping(value = "/login", consumes = APPLICATION_JSON_VALUE)
     public ResponseEntity<ResultResponse> login(@Validated @RequestBody MemberLoginRequest request) {
-        String accessToken = memberService.createAccessToken(request.getUserid(), request.getPassword());
+        memberService.checkUseridPassword(request.getUserid(), request.getPassword());
+        String accessToken = memberService.createAccessToken(request.getUserid());
         String refreshToken = memberService.updateRefreshToken(request);
 
         return ResponseEntity.ok()
@@ -84,7 +85,9 @@ public class MemberController {
         certificationService.save(certification);
 
         mailService.sendMail(request.getEmail(), subject, certification.getCertificationCode());
-        CertificationCodeResponse response = new CertificationCodeResponse(certification.getCertificationCode(), certification.getExpirationDateTime());
+        CertificationCodeResponse response = new CertificationCodeResponse(
+                certification.getCertificationCode(),
+                certification.getExpirationDateTime().format(DateTimeFormatter.ofPattern("yyyy.MM.dd hh:mm:ss")));
 
         return ResponseEntity.ok(ResultResponse.of(SEND_MAIL_SUCCESS, response));
     }
@@ -101,7 +104,9 @@ public class MemberController {
 
         Certificate certificate = Certificate.create();
         certificateService.save(certificate);
-        CertificateResponse response = new CertificateResponse(certificate.getToken(), certificate.getExpirationDateTime());
+        CertificateResponse response = new CertificateResponse(
+                certificate.getToken(),
+                certificate.getExpirationDateTime().format(DateTimeFormatter.ofPattern("yyyy.MM.dd hh:mm:ss")));
 
         return ResponseEntity.ok(ResultResponse.of(CERTIFY_EMAIL_SUCCESS, response));
     }
@@ -110,12 +115,8 @@ public class MemberController {
         if (findCertification.isEmpty() || !findCertification.get().getCertificationCode().equals(request.getCertificationCode())) {
             throw new CertificationCodeNotMatchException();
         }
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy.MM.dd. HH:mm:ss");
-        ZonedDateTime expirationDateTime = formatter.parse(findCertification.get().getExpirationDateTime())
-                .toInstant()
-                .atZone(ZoneId.of("Asia/Seoul"));
 
-        if (now.isAfter(expirationDateTime)) {
+        if (now.toLocalDateTime().isAfter(findCertification.get().getExpirationDateTime())) {
             certificationService.delete(findCertification.get().getToken());
             throw new ExpiredCertificationCodeException();
         }
@@ -165,11 +166,7 @@ public class MemberController {
         if (findCertificate.isEmpty() || !findCertificate.get().getToken().equals(request.getToken())) {
             throw new InvalidCertificateException();
         }
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy.MM.dd. HH:mm:ss");
-        ZonedDateTime expirationDateTime = formatter.parse(findCertificate.get().getExpirationDateTime())
-                .toInstant()
-                .atZone(ZoneId.of("Asia/Seoul"));
-        if (now.isAfter(expirationDateTime)) {
+        if (now.toLocalDateTime().isAfter(findCertificate.get().getExpirationDateTime())) {
             certificateService.delete(findCertificate.get().getToken());
             throw new InvalidCertificateException();
         }
@@ -206,11 +203,8 @@ public class MemberController {
         if (findCertificate.isEmpty() || !findCertificate.get().getToken().equals(request.getToken())) {
             throw new InvalidCertificateException();
         }
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy.MM.dd. HH:mm:ss");
-        ZonedDateTime expirationDateTime = formatter.parse(findCertificate.get().getExpirationDateTime())
-                .toInstant()
-                .atZone(ZoneId.of("Asia/Seoul"));
-        if (now.isAfter(expirationDateTime)) {
+
+        if (now.toLocalDateTime().isAfter(findCertificate.get().getExpirationDateTime())) {
             certificateService.delete(findCertificate.get().getToken());
             throw new InvalidCertificateException();
         }
@@ -235,11 +229,8 @@ public class MemberController {
         if (findCertificate.isEmpty() || !findCertificate.get().getToken().equals(request.getToken())) {
             throw new InvalidCertificateException();
         }
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy.MM.dd. HH:mm:ss");
-        ZonedDateTime expirationDateTime = formatter.parse(findCertificate.get().getExpirationDateTime())
-                .toInstant()
-                .atZone(ZoneId.of("Asia/Seoul"));
-        if (now.isAfter(expirationDateTime)) {
+
+        if (now.toLocalDateTime().isAfter(findCertificate.get().getExpirationDateTime())) {
             certificateService.delete(findCertificate.get().getToken());
             throw new InvalidCertificateException();
         }

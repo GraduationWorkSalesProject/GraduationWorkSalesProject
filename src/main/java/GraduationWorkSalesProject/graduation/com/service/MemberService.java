@@ -5,9 +5,7 @@ import GraduationWorkSalesProject.graduation.com.dto.member.MemberHelpFindPasswo
 import GraduationWorkSalesProject.graduation.com.dto.member.MemberJoinRequest;
 import GraduationWorkSalesProject.graduation.com.dto.member.MemberLoginRequest;
 import GraduationWorkSalesProject.graduation.com.entity.member.Member;
-import GraduationWorkSalesProject.graduation.com.exception.JoinInvalidInputException;
-import GraduationWorkSalesProject.graduation.com.exception.LoginInvalidInputException;
-import GraduationWorkSalesProject.graduation.com.exception.PasswordNotMatchException;
+import GraduationWorkSalesProject.graduation.com.exception.*;
 import GraduationWorkSalesProject.graduation.com.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -58,12 +56,15 @@ public class MemberService {
         findMember.encryptPassword(bCryptPasswordEncoder.encode(request.getNewPassword()));
     }
 
-    public String createAccessToken(String userid, String password) {
+    public void checkUseridPassword(String userid, String password){
         Optional<Member> findMember = memberRepository.findByUserid(userid);
         if (findMember.isEmpty() || !bCryptPasswordEncoder.matches(password, findMember.get().getPassword()))
             throw new LoginInvalidInputException();
+    }
 
-        UserDetails userDetails = userDetailsService.loadUserByUsername(findMember.get().getUsername());
+    public String createAccessToken(String userid) {
+        Member findMember = memberRepository.findByUserid(userid).orElseThrow(UseridNotExistException::new);
+        UserDetails userDetails = userDetailsService.loadUserByUsername(findMember.getUsername());
         return jwtTokenUtil.generateAccessToken(userDetails);
     }
 
