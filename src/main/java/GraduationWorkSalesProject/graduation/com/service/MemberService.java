@@ -25,6 +25,7 @@ public class MemberService {
     private final MemberRepository memberRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final JwtTokenUtil jwtTokenUtil;
+    private final JwtUserDetailsService userDetailsService;
 
     @Transactional
     public void save(MemberJoinRequest memberJoinRequest) {
@@ -57,14 +58,16 @@ public class MemberService {
         findMember.encryptPassword(bCryptPasswordEncoder.encode(request.getNewPassword()));
     }
 
-    public void checkUseridPassword(String userid, String password) {
+    public String createAccessToken(String userid, String password) {
         Optional<Member> findMember = memberRepository.findByUserid(userid);
-        if(findMember.isEmpty() || !bCryptPasswordEncoder.matches(password, findMember.get().getPassword())){
+        if (findMember.isEmpty() || !bCryptPasswordEncoder.matches(password, findMember.get().getPassword()))
             throw new LoginInvalidInputException();
-        }
+
+        UserDetails userDetails = userDetailsService.loadUserByUsername(findMember.get().getUsername());
+        return jwtTokenUtil.generateAccessToken(userDetails);
     }
 
-    public Optional<Member> findOneByEmail(String email){
+    public Optional<Member> findOneByEmail(String email) {
         return memberRepository.findByEmail(email);
     }
 
@@ -84,12 +87,15 @@ public class MemberService {
     }
 
     @Transactional
-    public String updateRefreshToken(MemberLoginRequest request, UserDetails userDetails) {
+    public String updateRefreshToken(MemberLoginRequest request) {
         Member member = memberRepository.findByUserid(request.getUserid()).get();
+        UserDetails userDetails = userDetailsService.loadUserByUsername(member.getUsername());
+
         if (member.getRefreshToken() == null || !jwtTokenUtil.validateRefreshToken(member.getRefreshToken())) {
             String refreshToken = jwtTokenUtil.generateRefreshToken(userDetails);
             member.updateRefreshToken(refreshToken);
         }
+
         return member.getRefreshToken();
     }
 }

@@ -31,8 +31,7 @@ import static GraduationWorkSalesProject.graduation.com.dto.result.ResultCode.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 // TODO:
-//  1. 만료된 인증 코드 모두 제거하는 로직 -> 회원가입, ID/PW 찾기 메소드에 동적 쿼리 추가 필요
-//  2. Redis -> heroku or aws에서 연동하는 방법 찾기
+//  1. Redis -> heroku or aws에서 연동하는 방법 찾기
 
 @Api(tags = "회원 API")
 @Slf4j
@@ -50,12 +49,8 @@ public class MemberController {
     @ApiOperation(value = "로그인", notes = "로그인 성공 시, JWT 토큰을 Response Header에 넣어서 반환합니다")
     @PostMapping(value = "/login", consumes = APPLICATION_JSON_VALUE)
     public ResponseEntity<ResultResponse> login(@Validated @RequestBody MemberLoginRequest request) {
-        memberService.checkUseridPassword(request.getUserid(), request.getPassword());
-
-        Member member = memberService.findOneByUserid(request.getUserid()).get();
-        UserDetails userDetails = userDetailsService.loadUserByUsername(member.getUsername());
-        String accessToken = jwtTokenUtil.generateAccessToken(userDetails);
-        String refreshToken = memberService.updateRefreshToken(request, userDetails);
+        String accessToken = memberService.createAccessToken(request.getUserid(), request.getPassword());
+        String refreshToken = memberService.updateRefreshToken(request);
 
         return ResponseEntity.ok()
                 .header("access-token", accessToken)
