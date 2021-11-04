@@ -5,27 +5,28 @@ import GraduationWorkSalesProject.graduation.com.repository.CertificateRepositor
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
 @Primary
 @Service
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class CertificateDbService implements CertificateService{
 
     private final CertificateRepository certificateRepository;
 
-    @Override
+    @Transactional
     public void save(Certificate certificate) {
         certificateRepository.save(certificate);
     }
 
-    @Override
     public Optional<Certificate> findOne(String token) {
         return certificateRepository.findById(token);
     }
 
-    @Override
+    @Transactional
     public void delete(String token) {
         certificateRepository.deleteById(token);
     }
