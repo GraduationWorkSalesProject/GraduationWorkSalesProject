@@ -10,6 +10,8 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Random;
 
@@ -25,9 +27,9 @@ public class Certificate {
     @Column(name = "certificate_token")
     private String token;
     @Column(name = "certificate_expiration_date")
-    private String expirationDateTime;
+    private LocalDateTime expirationDateTime;
 
-    public Certificate(String token, String expirationDateTime) {
+    public Certificate(String token, LocalDateTime expirationDateTime) {
         this.token = token;
         this.expirationDateTime = expirationDateTime;
     }
@@ -43,6 +45,6 @@ public class Certificate {
             }
         }
         return new Certificate(stringBuffer.toString(),
-                LocalDateTime.now().plusMinutes(30).format(DateTimeFormatter.ofPattern("yyyy.MM.dd. HH:mm:ss")));
+                ZonedDateTime.now(ZoneId.of("Asia/Seoul")).plusMinutes(30).toLocalDateTime());
     }
 }
