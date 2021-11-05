@@ -30,7 +30,7 @@ public class Member {
     @Column(name = "member_password")
     private String password;
 
-    @Column(name = "member_userid")
+    @Column(name = "member_userid", unique = true)
     private String userid;
 
     @Column(name = "member_username")
