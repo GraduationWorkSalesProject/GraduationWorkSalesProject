@@ -1,5 +1,6 @@
 package GraduationWorkSalesProject.graduation.com.config;
 
+import GraduationWorkSalesProject.graduation.com.exception.ExpiredRefreshTokenException;
 import GraduationWorkSalesProject.graduation.com.exception.InvalidJwtException;
 import io.jsonwebtoken.*;
 import lombok.extern.slf4j.Slf4j;
@@ -34,14 +35,6 @@ public class JwtTokenUtil {
         return getClaimFromRefreshToken(token, Claims::getSubject);
     }
 
-    public Date getExpirationDateFromAccessToken(String token) {
-        return getClaimFromAccessToken(token, Claims::getExpiration);
-    }
-
-    public Date getExpirationDateFromRefreshToken(String token) {
-        return getClaimFromRefreshToken(token, Claims::getExpiration);
-    }
-
     public <T> T getClaimFromAccessToken(String token, Function<Claims, T> claimsResolver) {
         Claims claims = getAllClaimsFromAccessToken(token);
         return claimsResolver.apply(claims);
@@ -57,12 +50,6 @@ public class JwtTokenUtil {
     }
 
     private Claims getAllClaimsFromRefreshToken(String token) {
-        try {
-            Claims body = Jwts.parser().setSigningKey(REFRESH_TOKEN_SECRET).parseClaimsJws(token).getBody();
-            System.out.println("body = " + body.getSubject());
-        } catch (Exception e) {
-            e.getStackTrace();
-        }
         return Jwts.parser().setSigningKey(REFRESH_TOKEN_SECRET).parseClaimsJws(token).getBody();
     }
 
@@ -95,8 +82,9 @@ public class JwtTokenUtil {
         return validateToken(token, ACCESS_TOKEN_SECRET);
     }
 
-    public Boolean validateRefreshToken(String token) {
-        return validateToken(token, REFRESH_TOKEN_SECRET);
+    public void validateRefreshToken(String token) {
+        if (validateToken(token, REFRESH_TOKEN_SECRET))
+            throw new ExpiredRefreshTokenException();
     }
 
     private Boolean validateToken(String token, String secret) {

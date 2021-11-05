@@ -13,17 +13,16 @@ import GraduationWorkSalesProject.graduation.com.dto.result.ResultCode;
 import GraduationWorkSalesProject.graduation.com.dto.result.ResultResponse;
 import GraduationWorkSalesProject.graduation.com.entity.member.Member;
 import GraduationWorkSalesProject.graduation.com.service.*;
+import GraduationWorkSalesProject.graduation.com.service.certificate.CertificateService;
+import GraduationWorkSalesProject.graduation.com.service.certification.CertificationService;
+import GraduationWorkSalesProject.graduation.com.service.mail.MailServiceGmailSMTP;
 import io.swagger.annotations.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.text.ParseException;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 
@@ -31,8 +30,7 @@ import static GraduationWorkSalesProject.graduation.com.dto.result.ResultCode.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 // TODO:
-//  1. 만료된 인증 코드 모두 제거하는 로직 -> 스케줄러로 구현
-//  2. Redis -> heroku or aws에서 연동하는 방법 찾기
+//  1. Redis -> heroku or aws에서 연동하는 방법 찾기
 
 @Api(tags = "회원 API")
 @Slf4j
@@ -42,8 +40,6 @@ public class MemberController {
 
     private final MemberService memberService;
     private final MailServiceGmailSMTP mailService;
-    private final JwtTokenUtil jwtTokenUtil;
-    private final JwtUserDetailsService userDetailsService;
     private final CertificationService certificationService;
     private final CertificateService certificateService;
 
@@ -52,10 +48,8 @@ public class MemberController {
     public ResponseEntity<ResultResponse> login(@Validated @RequestBody MemberLoginRequest request) {
         memberService.checkUseridPassword(request.getUserid(), request.getPassword());
 
-        Member member = memberService.findOneByUserid(request.getUserid()).get();
-        UserDetails userDetails = userDetailsService.loadUserByUsername(member.getUsername());
-        String accessToken = jwtTokenUtil.generateAccessToken(userDetails);
-        String refreshToken = memberService.updateRefreshToken(request, userDetails);
+        final String accessToken = memberService.createAccessTokenByUserid(request.getUserid());
+        final String refreshToken = memberService.updateRefreshToken(request);
 
         return ResponseEntity.ok()
                 .header("access-token", accessToken)
@@ -66,15 +60,10 @@ public class MemberController {
     @ApiOperation(value = "JWT 토큰 재발급", notes = "재발급 성공 시, JWT 토큰을 Response Header에 넣어서 반환합니다")
     @PostMapping(value = "/reissue", consumes = APPLICATION_JSON_VALUE)
     public ResponseEntity<ResultResponse> reIssueAccessToken(@Validated @RequestBody MemberJwtTokenRequest request) {
-        jwtTokenUtil.validateAccessToken(request.getAccessToken());
-        if (!jwtTokenUtil.validateRefreshToken(request.getRefreshToken())) throw new ExpiredRefreshTokenException();
+        memberService.validateJwts(request.getAccessToken(), request.getRefreshToken());
 
-        String username = getUsernameFromRefreshJwt(request.getRefreshToken());
-        Member member = memberService.findOneByUsername(username).orElseThrow(UseridNotExistException::new);
-        if (!member.getRefreshToken().equals(request.getRefreshToken())) throw new RefreshTokenNotMatchException();
-
-        UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-        String accessToken = jwtTokenUtil.generateAccessToken(userDetails);
+        final String username = memberService.getUsernameFromRefreshJwt(request.getRefreshToken());
+        final String accessToken = memberService.createAccessTokenByUsername(username);
 
         return ResponseEntity.ok()
                 .header("access-token", accessToken)
@@ -84,12 +73,12 @@ public class MemberController {
     @ApiOperation(value = "이메일 인증 코드 발송")
     @PostMapping(value = "/verification/email", consumes = APPLICATION_JSON_VALUE)
     public ResponseEntity<ResultResponse> sendCertificationCode(@Validated @RequestBody MemberEmailCertificationRequest request) {
-        String subject = "[그라듀] 이메일 인증코드 안내";
-        Certification certification = Certification.create(request.getToken());
+        final String subject = "[그라듀] 이메일 인증코드 안내";
+        final Certification certification = Certification.create(request.getToken());
         certificationService.save(certification);
 
         mailService.sendMail(request.getEmail(), subject, certification.getCertificationCode());
-        CertificationCodeResponse response = new CertificationCodeResponse(
+        final CertificationCodeResponse response = new CertificationCodeResponse(
                 certification.getCertificationCode(),
                 certification.getExpirationDateTime().format(DateTimeFormatter.ofPattern("yyyy.MM.dd hh:mm:ss")));
 
@@ -98,39 +87,24 @@ public class MemberController {
 
     @ApiOperation(value = "인증 코드 검증")
     @PostMapping(value = "/verification/code", consumes = APPLICATION_JSON_VALUE)
-    public ResponseEntity<ResultResponse> verifyCertificationCode(@Validated @RequestBody MemberCertificationCodeRequest request) throws ParseException {
-        ZonedDateTime now = ZonedDateTime.now(ZoneId.of("Asia/Seoul"));
-        Optional<Certification> findCertification = certificationService.findOne(request.getToken());
+    public ResponseEntity<ResultResponse> verifyCertificationCode(@Validated @RequestBody MemberCertificationCodeRequest request) {
+        certificationService.validateCertification(request);
+        certificationService.delete(request.getToken());
 
-        Certification certification = findCertification.get();
-        validateCertification(request, now, findCertification);
-        certificationService.delete(certification.getToken());
-
-        Certificate certificate = Certificate.create();
+        final Certificate certificate = Certificate.create();
         certificateService.save(certificate);
-        CertificateResponse response = new CertificateResponse(
+        final CertificateResponse response = new CertificateResponse(
                 certificate.getToken(),
                 certificate.getExpirationDateTime().format(DateTimeFormatter.ofPattern("yyyy.MM.dd hh:mm:ss")));
 
         return ResponseEntity.ok(ResultResponse.of(CERTIFY_EMAIL_SUCCESS, response));
     }
 
-    private void validateCertification(MemberCertificationCodeRequest request, ZonedDateTime now, Optional<Certification> findCertification) throws ParseException {
-        if (findCertification.isEmpty() || !findCertification.get().getCertificationCode().equals(request.getCertificationCode())) {
-            throw new CertificationCodeNotMatchException();
-        }
-
-        if (now.toLocalDateTime().isAfter(findCertification.get().getExpirationDateTime())) {
-            certificationService.delete(findCertification.get().getToken());
-            throw new ExpiredCertificationCodeException();
-        }
-    }
-
     @ApiOperation(value = "이메일 중복 체크")
     @PostMapping(value = "/overlap/email", consumes = APPLICATION_JSON_VALUE)
     public ResponseEntity<ResultResponse> checkEmailExists(@Validated @RequestBody MemberEmailCheckRequest request) {
-        Optional<Member> findMember = memberService.findOneByEmail(request.getEmail());
-        ResultCode resultCode = (findMember.isEmpty() ? EMAIL_VALID : EMAIL_DUPLICATION);
+        final Optional<Member> findMember = memberService.findOneByEmail(request.getEmail());
+        final ResultCode resultCode = (findMember.isEmpty() ? EMAIL_VALID : EMAIL_DUPLICATION);
 
         return ResponseEntity.ok(ResultResponse.of(resultCode, null));
     }
@@ -138,8 +112,8 @@ public class MemberController {
     @ApiOperation(value = "아이디 중복 체크")
     @PostMapping(value = "/overlap/userid", consumes = APPLICATION_JSON_VALUE)
     public ResponseEntity<ResultResponse> checkUseridExists(@Validated @RequestBody MemberUseridCheckRequest request) {
-        Optional<Member> findMember = memberService.findOneByUserid(request.getUserid());
-        ResultCode resultCode = (findMember.isEmpty() ? USERID_VALID : USERID_DUPLICATION);
+        final Optional<Member> findMember = memberService.findOneByUserid(request.getUserid());
+        final ResultCode resultCode = (findMember.isEmpty() ? USERID_VALID : USERID_DUPLICATION);
 
         return ResponseEntity.ok(ResultResponse.of(resultCode, null));
     }
@@ -147,40 +121,27 @@ public class MemberController {
     @ApiOperation(value = "닉네임 중복 체크")
     @PostMapping(value = "/overlap/username", consumes = APPLICATION_JSON_VALUE)
     public ResponseEntity<ResultResponse> checkUsernameExists(@Validated @RequestBody MemberUsernameCheckRequest request) {
-        Optional<Member> findMember = memberService.findOneByUsername(request.getUsername());
-        ResultCode resultCode = (findMember.isEmpty() ? USERNAME_VALID : USERNAME_DUPLICATION);
+        final Optional<Member> findMember = memberService.findOneByUsername(request.getUsername());
+        final ResultCode resultCode = (findMember.isEmpty() ? USERNAME_VALID : USERNAME_DUPLICATION);
 
         return ResponseEntity.ok(ResultResponse.of(resultCode, null));
     }
 
     @ApiOperation(value = "회원가입")
     @PostMapping(value = "/join", consumes = APPLICATION_JSON_VALUE)
-    public ResponseEntity<ResultResponse> join(@Validated @RequestBody MemberJoinRequest request) throws ParseException {
-        validateCertificate(request);
-
-        memberService.save(request);
+    public ResponseEntity<ResultResponse> join(@Validated @RequestBody MemberJoinRequest request) {
+        certificateService.validateCertificate(request.getToken());
         certificateService.delete(request.getToken());
+        memberService.save(request);
 
         return ResponseEntity.ok(ResultResponse.of(JOIN_SUCCESS, null));
-    }
-
-    private void validateCertificate(MemberJoinRequest request) throws ParseException {
-        ZonedDateTime now = ZonedDateTime.now(ZoneId.of("Asia/Seoul"));
-        Optional<Certificate> findCertificate = certificateService.findOne(request.getToken());
-        if (findCertificate.isEmpty() || !findCertificate.get().getToken().equals(request.getToken())) {
-            throw new InvalidCertificateException();
-        }
-        if (now.toLocalDateTime().isAfter(findCertificate.get().getExpirationDateTime())) {
-            certificateService.delete(findCertificate.get().getToken());
-            throw new InvalidCertificateException();
-        }
     }
 
     @ApiOperation(value = "회원탈퇴")
     @ApiImplicitParam(name = "Authorization", value = "권한", example = "Bearer xxx.yyy.zzz")
     @DeleteMapping("/leave")
     public ResponseEntity<ResultResponse> leave(@RequestHeader("Authorization") String authorization) {
-        String username = getUsernameFromAccessJwt(authorization);
+        final String username = memberService.getUsernameFromAccessJwt(authorization);
         memberService.removeOneByUsername(username);
 
         return ResponseEntity.ok(ResultResponse.of(LEAVE_SUCCESS, null));
@@ -188,63 +149,24 @@ public class MemberController {
 
     @ApiOperation(value = "아이디 찾기")
     @PostMapping(value = "/help/id", consumes = APPLICATION_JSON_VALUE)
-    public ResponseEntity<ResultResponse> helpFindUserid(@Validated @RequestBody MemberHelpFindUseridRequest request) throws ParseException {
-        validateCertificate(request);
-        if (memberService.findOneByEmail(request.getEmail()).isEmpty()) {
-            throw new EmailNotExistException();
-        }
+    public ResponseEntity<ResultResponse> helpFindUserid(@Validated @RequestBody MemberHelpFindUseridRequest request) {
+        certificateService.validateCertificate(request.getToken());
 
-        Member findMember = memberService.findOneByEmail(request.getEmail()).get();
-        MemberFindUseridResponse response = new MemberFindUseridResponse(findMember.getUserid());
+        final Member member = memberService.findOneByEmail(request.getEmail()).orElseThrow(EmailNotExistException::new);
+        final MemberFindUseridResponse response = new MemberFindUseridResponse(member.getUserid());
         certificateService.delete(request.getToken());
 
         return ResponseEntity.ok(ResultResponse.of(FIND_USERID_SUCCESS, response));
     }
 
-    private void validateCertificate(MemberHelpFindUseridRequest request) throws ParseException {
-        ZonedDateTime now = ZonedDateTime.now(ZoneId.of("Asia/Seoul"));
-        Optional<Certificate> findCertificate = certificateService.findOne(request.getToken());
-        if (findCertificate.isEmpty() || !findCertificate.get().getToken().equals(request.getToken())) {
-            throw new InvalidCertificateException();
-        }
-
-        if (now.toLocalDateTime().isAfter(findCertificate.get().getExpirationDateTime())) {
-            certificateService.delete(findCertificate.get().getToken());
-            throw new InvalidCertificateException();
-        }
-    }
-
     @ApiOperation(value = "비밀번호 찾기")
     @PostMapping(value = "/help/password", consumes = APPLICATION_JSON_VALUE)
-    public ResponseEntity<ResultResponse> helpChangePassword(@Validated @RequestBody MemberHelpFindPasswordRequest request) throws ParseException {
-        validateCertificate(request);
-        if (memberService.findOneByUserid(request.getUserid()).isEmpty()) {
-            throw new UseridNotExistException();
-        }
-        memberService.changePassword(request);
+    public ResponseEntity<ResultResponse> helpChangePassword(@Validated @RequestBody MemberHelpFindPasswordRequest request) {
+        certificateService.validateCertificate(request.getToken());
+
+        memberService.changePassword(request.getUserid(), request.getNewPassword(), request.getCheckPassword());
         certificateService.delete(request.getToken());
 
         return ResponseEntity.ok(ResultResponse.of(CHANGE_PASSWORD_SUCCESS, null));
-    }
-
-    private void validateCertificate(MemberHelpFindPasswordRequest request) throws ParseException {
-        ZonedDateTime now = ZonedDateTime.now(ZoneId.of("Asia/Seoul"));
-        Optional<Certificate> findCertificate = certificateService.findOne(request.getToken());
-        if (findCertificate.isEmpty() || !findCertificate.get().getToken().equals(request.getToken())) {
-            throw new InvalidCertificateException();
-        }
-
-        if (now.toLocalDateTime().isAfter(findCertificate.get().getExpirationDateTime())) {
-            certificateService.delete(findCertificate.get().getToken());
-            throw new InvalidCertificateException();
-        }
-    }
-
-    private String getUsernameFromAccessJwt(String authorization) {
-        return jwtTokenUtil.getUsernameFromAccessToken(authorization.substring(7));
-    }
-
-    private String getUsernameFromRefreshJwt(String authorization) {
-        return jwtTokenUtil.getUsernameFromRefreshToken(authorization);
     }
 }
