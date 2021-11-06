@@ -2,6 +2,7 @@ package GraduationWorkSalesProject.graduation.com.advice;
 
 import GraduationWorkSalesProject.graduation.com.dto.error.ErrorResponse;
 import GraduationWorkSalesProject.graduation.com.exception.*;
+import io.jsonwebtoken.SignatureException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindException;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import static GraduationWorkSalesProject.graduation.com.dto.error.ErrorCode.*;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 
 @RestControllerAdvice("GraduationWorkSalesProject.graduation.com.controller")
 public class GlobalExceptionHandler {
@@ -66,9 +68,33 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler
+    protected ResponseEntity<ErrorResponse> expiredRefreshTokenExceptionHandler(ExpiredRefreshTokenException e) {
+        final ErrorResponse response = ErrorResponse.of(EXPIRED_REFRESH_TOKEN);
+        return new ResponseEntity<>(response, UNAUTHORIZED);
+    }
+
+    @ExceptionHandler
     protected ResponseEntity<ErrorResponse> expiredCertificationCodeExceptionHandler(ExpiredCertificationCodeException e) {
         final ErrorResponse response = ErrorResponse.of(EXPIRED_CERTIFICATION_CODE);
         return new ResponseEntity<>(response, BAD_REQUEST);
+    }
+
+    @ExceptionHandler
+    protected ResponseEntity<ErrorResponse> refreshTokenNotMatchExceptionHandler(RefreshTokenNotMatchException e) {
+        final ErrorResponse response = ErrorResponse.of(REFRESH_TOKEN_NOT_MATCH);
+        return new ResponseEntity<>(response, BAD_REQUEST);
+    }
+
+    @ExceptionHandler
+    protected ResponseEntity<ErrorResponse> signatureExceptionHandler(SignatureException e) {
+        final ErrorResponse response = ErrorResponse.of(SIGNATURE_NOT_MATCH);
+        return new ResponseEntity<>(response, BAD_REQUEST);
+    }
+
+    @ExceptionHandler
+    protected ResponseEntity<ErrorResponse> invalidJwtExceptionHandler(InvalidJwtException e) {
+        final ErrorResponse response = ErrorResponse.of(INVALID_TOKEN);
+        return new ResponseEntity<>(response, UNAUTHORIZED);
     }
 
     @ExceptionHandler

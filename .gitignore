@@ -4,6 +4,8 @@ Procfile
 keys
 settings.gradle
 .gradle
+docker-compose.yml
+Dockerfile
 build/
 src/main/resources/application.yml
 src/main/resources-dev/application-dev.yml

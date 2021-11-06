@@ -71,4 +71,5 @@ compileQuerydsl.doFirst {
 	if(file(querydslDir).exists())
 		delete(file(querydslDir))
 }
+tasks.withType(JavaCompile) { options.annotationProcessorGeneratedSourcesDirectory = file(querydslDir) }
 //querydsl 추가 끝

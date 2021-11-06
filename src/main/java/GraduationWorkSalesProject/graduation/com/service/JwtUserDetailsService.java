@@ -23,17 +23,17 @@ public class JwtUserDetailsService implements UserDetailsService {
     private final MemberRepository memberRepository;
 
     @Override
-    public UserDetails loadUserByUsername(String userid) throws UsernameNotFoundException {
-        Optional<Member> findMember = memberRepository.findByUserid(userid);
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        Optional<Member> findMember = memberRepository.findByUsername(username);
 
         if (findMember.isPresent()) {
             List<GrantedAuthority> authorities = new ArrayList<>();
             authorities.add((GrantedAuthority) () -> findMember.get().getRole().name());
-            return new User(findMember.get().getUserid(),
+            return new User(findMember.get().getUsername(),
                     findMember.get().getPassword(),
                     new ArrayList<>(authorities));
         } else {
-            throw new UsernameNotFoundException("User not found with userid: " + userid);
+            throw new UsernameNotFoundException("User not found with username: " + username);
         }
     }
 }

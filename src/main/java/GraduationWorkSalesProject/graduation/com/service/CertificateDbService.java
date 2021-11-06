@@ -1,32 +1,33 @@
 package GraduationWorkSalesProject.graduation.com.service;
 
 import GraduationWorkSalesProject.graduation.com.entity.certify.Certificate;
-import GraduationWorkSalesProject.graduation.com.repository.CertificateRedisRepository;
 import GraduationWorkSalesProject.graduation.com.repository.CertificateRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
+@Primary
 @Service
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
-public class CertificateRedisService implements CertificateService{
+public class CertificateDbService implements CertificateService{
 
-    private final CertificateRedisRepository certificateRepository;
+    private final CertificateRepository certificateRepository;
 
+    @Transactional
     public void save(Certificate certificate) {
         certificateRepository.save(certificate);
     }
 
-    @Cacheable(value = "certificate", key = "#token", cacheManager = "cacheManager")
     public Optional<Certificate> findOne(String token) {
         return certificateRepository.findById(token);
     }
 
-    @CacheEvict(value = "certificate", key = "#token")
-    public void delete(String token){
+    @Transactional
+    public void delete(String token) {
         certificateRepository.deleteById(token);
     }
 }
