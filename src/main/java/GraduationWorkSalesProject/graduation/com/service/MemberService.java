@@ -1,13 +1,11 @@
 package GraduationWorkSalesProject.graduation.com.service;
 
 import GraduationWorkSalesProject.graduation.com.config.JwtTokenUtil;
-import GraduationWorkSalesProject.graduation.com.dto.member.MemberHelpFindPasswordRequest;
 import GraduationWorkSalesProject.graduation.com.dto.member.MemberJoinRequest;
+import GraduationWorkSalesProject.graduation.com.dto.member.MemberJwtTokenRequest;
 import GraduationWorkSalesProject.graduation.com.dto.member.MemberLoginRequest;
 import GraduationWorkSalesProject.graduation.com.entity.member.Member;
-import GraduationWorkSalesProject.graduation.com.exception.JoinInvalidInputException;
-import GraduationWorkSalesProject.graduation.com.exception.LoginInvalidInputException;
-import GraduationWorkSalesProject.graduation.com.exception.PasswordNotMatchException;
+import GraduationWorkSalesProject.graduation.com.exception.*;
 import GraduationWorkSalesProject.graduation.com.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -25,6 +23,7 @@ public class MemberService {
     private final MemberRepository memberRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final JwtTokenUtil jwtTokenUtil;
+    private final JwtUserDetailsService userDetailsService;
 
     @Transactional
     public void save(MemberJoinRequest memberJoinRequest) {
@@ -48,23 +47,21 @@ public class MemberService {
     }
 
     @Transactional
-    public void changePassword(MemberHelpFindPasswordRequest request) {
-        Member findMember = memberRepository.findByUserid(request.getUserid()).get();
-        if (!request.getNewPassword().equals(request.getCheckPassword())) {
+    public void changePassword(String userid, String newPassword, String checkPassword) {
+        Member findMember = memberRepository.findByUserid(userid).orElseThrow(UseridNotExistException::new);
+        if (!newPassword.equals(checkPassword))
             throw new PasswordNotMatchException();
-        }
 
-        findMember.encryptPassword(bCryptPasswordEncoder.encode(request.getNewPassword()));
+        findMember.encryptPassword(bCryptPasswordEncoder.encode(newPassword));
     }
 
     public void checkUseridPassword(String userid, String password) {
         Optional<Member> findMember = memberRepository.findByUserid(userid);
-        if(findMember.isEmpty() || !bCryptPasswordEncoder.matches(password, findMember.get().getPassword())){
+        if (findMember.isEmpty() || !bCryptPasswordEncoder.matches(password, findMember.get().getPassword()))
             throw new LoginInvalidInputException();
-        }
     }
 
-    public Optional<Member> findOneByEmail(String email){
+    public Optional<Member> findOneByEmail(String email) {
         return memberRepository.findByEmail(email);
     }
 
@@ -84,12 +81,48 @@ public class MemberService {
     }
 
     @Transactional
-    public String updateRefreshToken(MemberLoginRequest request, UserDetails userDetails) {
-        Member member = memberRepository.findByUserid(request.getUserid()).get();
-        if (member.getRefreshToken() == null || !jwtTokenUtil.validateRefreshToken(member.getRefreshToken())) {
-            String refreshToken = jwtTokenUtil.generateRefreshToken(userDetails);
+    public String updateRefreshToken(MemberLoginRequest request) {
+        final Member member = memberRepository.findByUserid(request.getUserid()).orElseThrow(UseridNotExistException::new);
+        if (member.getRefreshToken() == null) {
+            jwtTokenUtil.validateRefreshToken(member.getRefreshToken());
+            final UserDetails userDetails = userDetailsService.loadUserByUsername(member.getUsername());
+            final String refreshToken = jwtTokenUtil.generateRefreshToken(userDetails);
             member.updateRefreshToken(refreshToken);
         }
         return member.getRefreshToken();
+    }
+
+    public String createAccessTokenByUserid(String userid) {
+        final Member member = memberRepository.findByUserid(userid).orElseThrow(UseridNotExistException::new);
+        final UserDetails userDetails = userDetailsService.loadUserByUsername(member.getUsername());
+        return jwtTokenUtil.generateAccessToken(userDetails);
+    }
+
+    public String createAccessTokenByUsername(String username) {
+        final UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+        return jwtTokenUtil.generateAccessToken(userDetails);
+    }
+
+    public String getUsernameFromAccessJwt(String accessToken) {
+        return jwtTokenUtil.getUsernameFromAccessToken(accessToken.substring(7));
+    }
+
+    public String getUsernameFromRefreshJwt(String refreshToken) {
+        final String username = jwtTokenUtil.getUsernameFromRefreshToken(refreshToken);
+        checkRefreshToken(refreshToken);
+
+        return username;
+    }
+
+    private void checkRefreshToken(String refreshToken){
+        final String username = getUsernameFromRefreshJwt(refreshToken);
+        final Member member = memberRepository.findByUsername(username).orElseThrow(UseridNotExistException::new);
+        if (!member.getRefreshToken().equals(refreshToken))
+            throw new RefreshTokenNotMatchException();
+    }
+
+    public void validateJwts(String accessToken, String refreshToken) {
+        jwtTokenUtil.validateAccessToken(accessToken);
+        jwtTokenUtil.validateRefreshToken(refreshToken);
     }
 }
