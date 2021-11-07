@@ -84,7 +84,6 @@ public class MemberService {
     public String updateRefreshToken(MemberLoginRequest request) {
         final Member member = memberRepository.findByUserid(request.getUserid()).orElseThrow(UseridNotExistException::new);
         if (member.getRefreshToken() == null) {
-            jwtTokenUtil.validateRefreshToken(member.getRefreshToken());
             final UserDetails userDetails = userDetailsService.loadUserByUsername(member.getUsername());
             final String refreshToken = jwtTokenUtil.generateRefreshToken(userDetails);
             member.updateRefreshToken(refreshToken);
