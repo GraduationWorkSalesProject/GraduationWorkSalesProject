@@ -1,8 +1,7 @@
 package GraduationWorkSalesProject.graduation.com.exception;
 
-public class EmailNotExistException extends RuntimeException {
-    public EmailNotExistException() {
+import GraduationWorkSalesProject.graduation.com.dto.error.ErrorCode;
 
-
-    }
+public class EmailNotExistException extends BusinessException {
+    public EmailNotExistException() { super(ErrorCode.EMAIL_NOT_EXIST); }
 }

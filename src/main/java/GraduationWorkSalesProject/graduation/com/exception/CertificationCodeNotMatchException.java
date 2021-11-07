@@ -1,7 +1,9 @@
 package GraduationWorkSalesProject.graduation.com.exception;
 
-public class CertificationCodeNotMatchException extends RuntimeException {
+import GraduationWorkSalesProject.graduation.com.dto.error.ErrorCode;
+
+public class CertificationCodeNotMatchException extends BusinessException {
     public CertificationCodeNotMatchException() {
-        super();
+        super(ErrorCode.CERTIFICATION_CODE_NOT_MATCH);
     }
 }

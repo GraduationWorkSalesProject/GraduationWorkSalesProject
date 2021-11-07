@@ -1,7 +1,9 @@
 package GraduationWorkSalesProject.graduation.com.exception;
 
-public class ExpiredCertificationCodeException extends RuntimeException {
+import GraduationWorkSalesProject.graduation.com.dto.error.ErrorCode;
+
+public class ExpiredCertificationCodeException extends BusinessException {
     public ExpiredCertificationCodeException() {
-        super();
+        super(ErrorCode.EXPIRED_CERTIFICATION_CODE);
     }
 }
