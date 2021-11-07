@@ -1,7 +1,9 @@
 package GraduationWorkSalesProject.graduation.com.exception;
 
-public class PasswordNotMatchException extends RuntimeException {
+import GraduationWorkSalesProject.graduation.com.dto.error.ErrorCode;
+
+public class PasswordNotMatchException extends BusinessException {
     public PasswordNotMatchException() {
-        super();
+        super(ErrorCode.PASSWORD_NOT_MATCH);
     }
 }

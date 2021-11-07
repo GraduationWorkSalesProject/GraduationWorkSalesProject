@@ -1,7 +1,9 @@
 package GraduationWorkSalesProject.graduation.com.exception;
 
-public class ExpiredRefreshTokenException extends RuntimeException {
+import GraduationWorkSalesProject.graduation.com.dto.error.ErrorCode;
+
+public class ExpiredRefreshTokenException extends BusinessException {
     public ExpiredRefreshTokenException() {
-        super();
+        super(ErrorCode.EXPIRED_REFRESH_TOKEN);
     }
 }

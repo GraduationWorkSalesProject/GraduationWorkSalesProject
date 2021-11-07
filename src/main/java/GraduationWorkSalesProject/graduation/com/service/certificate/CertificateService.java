@@ -1,11 +1,9 @@
-package GraduationWorkSalesProject.graduation.com.service;
+package GraduationWorkSalesProject.graduation.com.service.certificate;
 
 import GraduationWorkSalesProject.graduation.com.entity.certify.Certificate;
 
-import java.util.Optional;
-
 public interface CertificateService {
     void save(Certificate certificate);
-    Optional<Certificate> findOne(String token);
     void delete(String token);
+    void validateCertificate(String token);
 }

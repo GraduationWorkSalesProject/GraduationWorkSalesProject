@@ -1,4 +1,4 @@
-package GraduationWorkSalesProject.graduation.com.service;
+package GraduationWorkSalesProject.graduation.com.service.mail;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.mail.SimpleMailMessage;
