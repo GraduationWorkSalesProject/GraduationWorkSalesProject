@@ -83,15 +83,13 @@ public class JwtTokenUtil {
     }
 
     public void validateRefreshToken(String token) {
-        if (validateToken(token, REFRESH_TOKEN_SECRET))
+        if (!validateToken(token, REFRESH_TOKEN_SECRET))
             throw new ExpiredRefreshTokenException();
     }
 
     private Boolean validateToken(String token, String secret) {
         try {
             Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody();
-        } catch (SignatureException e) {
-            throw new SignatureException(null);
         } catch (ExpiredJwtException e) {
             return false;
         } catch (JwtException e) {
