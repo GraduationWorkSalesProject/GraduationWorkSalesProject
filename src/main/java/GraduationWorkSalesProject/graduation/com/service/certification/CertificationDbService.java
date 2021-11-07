@@ -4,13 +4,13 @@ import GraduationWorkSalesProject.graduation.com.dto.member.MemberCertificationC
 import GraduationWorkSalesProject.graduation.com.entity.certify.Certification;
 import GraduationWorkSalesProject.graduation.com.exception.CertificationCodeNotMatchException;
 import GraduationWorkSalesProject.graduation.com.exception.ExpiredCertificationCodeException;
+import GraduationWorkSalesProject.graduation.com.exception.InvalidTokenException;
 import GraduationWorkSalesProject.graduation.com.repository.CertificationRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.text.ParseException;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -38,7 +38,7 @@ public class CertificationDbService implements CertificationService{
     public void validateCertification(MemberCertificationCodeRequest request) {
         ZonedDateTime now = ZonedDateTime.now(ZoneId.of("Asia/Seoul"));
         Certification findCertification = certificationRepository.findById(request.getToken())
-                .orElseThrow(ExpiredCertificationCodeException::new);
+                .orElseThrow(InvalidTokenException::new);
 
         if (!findCertification.getCertificationCode().equals(request.getCertificationCode()))
             throw new CertificationCodeNotMatchException();
