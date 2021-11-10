@@ -108,13 +108,12 @@ public class MemberService {
 
     public String getUsernameFromRefreshJwt(String refreshToken) {
         final String username = jwtTokenUtil.getUsernameFromRefreshToken(refreshToken);
-        checkRefreshToken(refreshToken);
+        checkRefreshToken(refreshToken, username);
 
         return username;
     }
 
-    private void checkRefreshToken(String refreshToken){
-        final String username = getUsernameFromRefreshJwt(refreshToken);
+    private void checkRefreshToken(String refreshToken, String username){
         final Member member = memberRepository.findByUsername(username).orElseThrow(UseridNotExistException::new);
         if (!member.getRefreshToken().equals(refreshToken))
             throw new RefreshTokenNotMatchException();
