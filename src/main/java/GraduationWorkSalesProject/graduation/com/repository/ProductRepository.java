@@ -4,12 +4,12 @@ import GraduationWorkSalesProject.graduation.com.entity.product.Product;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface ProductRepository extends JpaRepository<Product, Long> {
 
 
-    Product findProductById(Long product_id);
-    List<Product> findProductsByCategoriesId(Long category_id);
+    Optional<Product> findProductById(Long productId);
     List<Product> findTop10ByOrderByProductRegisterDateDesc();
     List<Product> findProductsByProductNameContaining(String keyword);
 

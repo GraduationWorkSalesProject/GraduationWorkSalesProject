@@ -60,7 +60,7 @@ public class ProductService {
         for (int i = 0; i < limit; i++) {
             int num = keyList.get(i);
             Long product_id = Long.valueOf(map.get(num));
-            products.add(productRepository.findProductById(product_id));
+            products.add(productRepository.findProductById(product_id).orElseThrow());
         }
         return products;
     }
@@ -72,10 +72,7 @@ public class ProductService {
 
     @Transactional
     public void LikeProductAdd(Long member_id, Long product_id) {
-        Like likeEntity = null;
-        likeEntity.setMember(memberRepository.getById(member_id));
-        likeEntity.setProduct(productRepository.getById(product_id));
-        likeRepository.save(likeEntity);
+        likeRepository.save(new Like(productRepository.getById(product_id),memberRepository.getById(member_id)));
     }
 
     @Transactional
@@ -91,12 +88,12 @@ public class ProductService {
 
     @Transactional
     public void LikeProductUndo(Long member_id, Long product_id) {
-        Like likeEntity = likeRepository.findByMemberIdAndProductId(member_id, product_id);
+        Like likeEntity = likeRepository.findByMemberIdAndProductId(member_id, product_id).orElseThrow();
         likeRepository.deleteById(likeEntity.getId());
     }
 
     @Transactional
-    public int getLikeNum(Long product_id) {
+    public Long getLikeNum(Long product_id) {
         return likeRepository.countLikeByProductId(product_id);
     }
 
@@ -113,7 +110,7 @@ public class ProductService {
 
     @Transactional
     public List<Product> getCategoryProducts(Long category_id){
-        return categoryRepository.findById(category_id).get().getProducts();
+        return categoryRepository.findById(category_id).orElseThrow().getProducts();
     }
 
     @Transactional
@@ -133,12 +130,12 @@ public class ProductService {
 
     @Transactional
     public List<Product> getHashtagSearchResult(Long hashtag_id){
-        return hashtagRepository.findHashtagById(hashtag_id).getHashtagproducts();
+        return hashtagRepository.findHashtagById(hashtag_id).orElseThrow().getHashtagproducts();
     }
 
     @Transactional
     public Hashtag getHashtagByHashtagName(String hashtagName){
-        return hashtagRepository.findHashtagByHashtagName(hashtagName);
+        return hashtagRepository.findHashtagByHashtagName(hashtagName).orElseThrow();
     }
 
 

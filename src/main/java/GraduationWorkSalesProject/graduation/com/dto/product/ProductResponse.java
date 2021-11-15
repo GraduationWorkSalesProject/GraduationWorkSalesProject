@@ -14,35 +14,25 @@ public class ProductResponse {
 
     private Long id;
     private String productName;
-    private Long category_id;
+    private Long categoryId;
     private String categoryName;
     private int productPrice;
     private String productInformation;
     private Timestamp productRegisterDate;
     private Timestamp productUpdateDate;
     private int productRating;
-    /*
-    private String image_href;
-    private ImageLinkResponse image;
-    */
+
     public ProductResponse(Product product) {
         this.id = product.getId();
-        this.productName = product.getProductName();
-        this.category_id = product.getCategories().get(0).getId();
+        this.productName = product.getName();
+        this.categoryId = product.getCategories().get(0).getId();
         this.categoryName = product.getCategories().get(0).getCategoryName();
-        this.productPrice = product.getProductPrice();
-        this.productInformation = product.getProductInformation();
-        this.productRegisterDate = product.getProductRegisterDate();
-        this.productUpdateDate = product.getProductUpdateDate();
-        this.productRating = product.getProductRating();
-        /*
-        this.image_href = product.getProductRepresentationImage().getImageHref();
-        this.image.setImageHref(product.getProductRepresentationImage().getImageHref());
-        this.image.setImageName(product.getProductRepresentationImage().getImageName());
-        this.image.setImageType(product.getProductRepresentationImage().getImageType());
-        this.image.setImageUuid(product.getProductRepresentationImage().getImageUuid());
+        this.productPrice = product.getPrice();
+        this.productInformation = product.getInformation();
+        this.productRegisterDate = product.getRegisterDate();
+        this.productUpdateDate = product.getUpdateDate();
+        this.productRating = product.getRating();
 
-        */
     }
 
 

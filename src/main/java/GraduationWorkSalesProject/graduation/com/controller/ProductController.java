@@ -40,9 +40,9 @@ public class ProductController {
         //if hashtag exist => add to product
         //if hashtag not exist => create hashtag and add to product
         Long product_id = productService.saveProduct(registerProduct);
-        Optional<Category> category = productService.findCategory(productRegisterRequest.getCategory_id());
-        category.get().addProduct(registerProduct);
-        productService.saveCategory(category.get());
+        Optional<Category> category = productService.findCategory(productRegisterRequest.getCategoryId());
+        category.orElseThrow().addProduct(registerProduct);
+        productService.saveCategory(category.orElseThrow());
 
         for(String hashtag: hashtags){
 
@@ -77,7 +77,7 @@ public class ProductController {
     @GetMapping(value = "/products/{id}")
     public ResponseEntity<ResultResponse> getProduct(@PathVariable Long id){
         Optional<Product> product =  productService.getProduct(id);
-        ProductResponse response = new ProductResponse(product.get());
+        ProductResponse response = new ProductResponse(product.orElseThrow());
         return ResponseEntity.ok(ResultResponse.of(ResultCode.PRODUCT_GET_SUCCESS,response));
     }
 
@@ -143,7 +143,7 @@ public class ProductController {
         Category child_category = categoryRegisterRequest.convert();
 
 
-        Category parent_category = categoryRepository.getOne(categoryRegisterRequest.getCategory_parent_id());
+        Category parent_category = categoryRepository.getOne(categoryRegisterRequest.getCategoryParentId());
 
         child_category.setCategoryParent(parent_category);
         productService.saveCategory(child_category);
@@ -176,7 +176,7 @@ public class ProductController {
     @GetMapping(value="/products/{id}/like", consumes = APPLICATION_JSON_VALUE)
     public ResponseEntity<ResultResponse> likeProduct(@RequestHeader("Authorization") String authorization, @PathVariable Long id){
         final String username = memberService.getUsernameFromAccessJwt(authorization);
-        Long member_id = memberService.findOneByUsername(username).get().getId();
+        Long member_id = memberService.findOneByUsername(username).orElseThrow().getId();
         productService.LikeProductAdd(member_id,id);
         //if member already like product? => need discuss
         return ResponseEntity.ok(ResultResponse.of(ResultCode.PRODUCT_LIKE_SUCCESS,null));
@@ -187,7 +187,7 @@ public class ProductController {
     @GetMapping(value = "/products/lists/mylike")
     public ResponseEntity<ResultResponse> getMemberLikeProudcts(@RequestHeader("Authorization") String authorization){
         final String username = memberService.getUsernameFromAccessJwt(authorization);
-        Long member_id = memberService.findOneByUsername(username).get().getId();
+        Long member_id = memberService.findOneByUsername(username).orElseThrow().getId();
         List<Product> products = productService.getMemberLikeProducts(member_id);
         List<ProductResponse> response = new ArrayList<>();
         for(Product product: products){
@@ -199,7 +199,7 @@ public class ProductController {
     @ApiOperation(value = "회원 상품 좋아요 취소")
     public ResponseEntity<ResultResponse> UndoMemberLikeProudct(@RequestHeader("Authorization") String authorization,Long product_id) {
         final String username = memberService.getUsernameFromAccessJwt(authorization);
-        Long member_id = memberService.findOneByUsername(username).get().getId();
+        Long member_id = memberService.findOneByUsername(username).orElseThrow().getId();
         productService.LikeProductUndo(member_id,product_id);
         return ResponseEntity.ok(ResultResponse.of(ResultCode.PRODUCT_LIKE_UNDO_SUCCESS,null));
 

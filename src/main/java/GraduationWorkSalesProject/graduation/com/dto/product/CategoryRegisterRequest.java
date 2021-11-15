@@ -13,12 +13,12 @@ import javax.validation.constraints.NotEmpty;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class CategoryRegisterRequest {
 
-    @NotEmpty
-    private String category_name;
+    @NotEmpty(message = "카테고리이름을 입력해주세요")
+    private String categoryName;
 
-    private Long category_parent_id;
+    private Long categoryParentId;
 
     public Category convert(){
-        return Category.builder().categoryName(category_name).build();
+        return Category.builder().categoryName(categoryName).build();
     }
 }

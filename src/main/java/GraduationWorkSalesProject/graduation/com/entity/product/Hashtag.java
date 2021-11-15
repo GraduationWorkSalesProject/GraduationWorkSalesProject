@@ -15,14 +15,14 @@ import java.util.List;
 @Table(name = "hashtags")
 public class Hashtag {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "hashtag_id")
     private Long id;
 
     @Column(name = "hashtag_name")
     private String hashtagName;
 
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "product_hashtag",
             joinColumns = @JoinColumn(name = "hashtag_id"),
             inverseJoinColumns = @JoinColumn(name = "product_id"))
@@ -32,7 +32,7 @@ public class Hashtag {
         hashtagproducts.add(product);
         List<Hashtag> hashtagList = product.getHashtags();
         hashtagList.add(this);
-        product.setHashtags(hashtagList);
+        //product.setHashtags(hashtagList);
     }
 
     @Builder

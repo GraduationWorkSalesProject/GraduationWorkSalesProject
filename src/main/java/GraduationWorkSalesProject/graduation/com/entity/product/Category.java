@@ -8,7 +8,6 @@ import java.util.List;
 
 @NoArgsConstructor(access= AccessLevel.PROTECTED)
 @Getter
-@Setter
 @Entity
 @Table(name = "product_categories")
 public class Category {
@@ -21,24 +20,24 @@ public class Category {
     @Column(name = "category_name")
     private String categoryName;
 
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "category_product",
             joinColumns = @JoinColumn(name = "category_id"),
             inverseJoinColumns = @JoinColumn(name = "product_id"))
     private List<Product> products = new ArrayList<Product>();
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_parent_id")
     private Category parent;
 
-    @OneToMany(mappedBy = "parent",fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "parent",fetch = FetchType.LAZY)
     private List<Category> child = new ArrayList<Category>();
 
     public void addProduct(Product product){
         products.add(product);
         List<Category> categoryList = product.getCategories();
         categoryList.add(this);
-        product.setCategories(categoryList);
+        //product.setCategories(categoryList);
     }
 
     public void addCategoryChild(Category category){

@@ -4,13 +4,11 @@ import GraduationWorkSalesProject.graduation.com.vo.Image;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 import javax.persistence.*;
 
 @NoArgsConstructor(access= AccessLevel.PROTECTED)
 @Getter
-@Setter
 @Entity
 @Table(name = "product_images")
 public class ProductImage {
@@ -27,6 +25,10 @@ public class ProductImage {
             @AttributeOverride(name = "imageType", column = @Column(name = "product_image_type")),
             @AttributeOverride(name = "imageHref", column = @Column(name = "product_image_href"))
     })
-    private Image product_image;
+    private Image image;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "product_id")
+    private Product product;
 
 }

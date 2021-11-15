@@ -14,7 +14,6 @@ import java.util.List;
 
 @NoArgsConstructor(access= AccessLevel.PROTECTED)
 @Getter
-@Setter
 @Entity
 @EntityListeners(AuditingEntityListener.class)
 @Table(name = "products")
@@ -26,16 +25,16 @@ public class Product {
     private Long id;
 
     @Column(length = 20, name = "product_name")
-    private String productName;
+    private String name;
 
     @Column(name = "product_price")
-    private int productPrice;
+    private int price;
 
     //length limit of product info?
     @Column(length = 1000, name = "product_information")
-    private String productInformation;
+    private String information;
 
-    @ManyToMany(mappedBy = "products", fetch = FetchType.EAGER)
+    @ManyToMany(mappedBy = "products", fetch = FetchType.LAZY)
     private List<Category> categories = new ArrayList<Category>();
 
     @ManyToMany(mappedBy = "hashtagproducts", fetch = FetchType.LAZY)
@@ -43,15 +42,15 @@ public class Product {
 
     @Column(name = "product_register_date")
     @CreatedDate
-    private Timestamp productRegisterDate;
+    private Timestamp registerDate;
 
 
     @Column(name = "product_update_date")
     @LastModifiedDate
-    private Timestamp productUpdateDate;
+    private Timestamp updateDate;
 
     @Column(name = "product_rating")
-    private int productRating;
+    private int rating;
 
     @Embedded
     @AttributeOverrides({
@@ -60,13 +59,13 @@ public class Product {
             @AttributeOverride(name = "imageType", column = @Column(name = "product_representation_image_type")),
             @AttributeOverride(name = "imageHref", column = @Column(name = "product_representation_image_href"))
     })
-    private Image productRepresentationImage;
+    private Image representationImage;
 
     @Builder
-    public Product(String productName,int productPrice,String productInformation,int productRating){
-        this.productName = productName;
-        this.productPrice = productPrice;
-        this.productInformation = productInformation;
-        this.productRating = productRating;
+    public Product(String name,int price,String information,int rating){
+        this.name = name;
+        this.price = price;
+        this.information = information;
+        this.rating = rating;
     }
 }

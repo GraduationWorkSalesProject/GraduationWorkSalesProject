@@ -3,7 +3,9 @@ package GraduationWorkSalesProject.graduation.com.repository;
 import GraduationWorkSalesProject.graduation.com.entity.product.Hashtag;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.Optional;
+
 public interface HashtagRepository extends JpaRepository<Hashtag, Long> {
-    Hashtag findHashtagById(Long hashtag_id);
-    Hashtag findHashtagByHashtagName(String hashtagName);
+    Optional<Hashtag> findHashtagById(Long hashtag_id);
+    Optional<Hashtag> findHashtagByHashtagName(String hashtagName);
 }
