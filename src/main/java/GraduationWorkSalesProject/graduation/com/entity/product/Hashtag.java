@@ -1,6 +1,7 @@
 package GraduationWorkSalesProject.graduation.com.entity.product;
 
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -21,11 +22,22 @@ public class Hashtag {
     @Column(name = "hashtag_name")
     private String hashtagName;
 
-    @OneToMany(mappedBy = "hashtag")
-    private List<ProductHashtag> products = new ArrayList<>();
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(name = "product_hashtag",
+            joinColumns = @JoinColumn(name = "hashtag_id"),
+            inverseJoinColumns = @JoinColumn(name = "product_id"))
+    private List<Product> hashtagproducts = new ArrayList<Product>();
 
-    public void addHashtagProduct(ProductHashtag productHashtag){
-        products.add(productHashtag);
-        productHashtag.setHashtag(this);
+    public void addProduct(Product product){
+        hashtagproducts.add(product);
+        List<Hashtag> hashtagList = product.getHashtags();
+        hashtagList.add(this);
+        product.setHashtags(hashtagList);
     }
+
+    @Builder
+    public Hashtag(String hashtagName){
+        this.hashtagName = hashtagName;
+    }
+
 }

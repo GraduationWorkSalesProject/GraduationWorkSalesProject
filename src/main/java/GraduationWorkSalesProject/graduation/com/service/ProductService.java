@@ -1,8 +1,7 @@
 package GraduationWorkSalesProject.graduation.com.service;
 
-import GraduationWorkSalesProject.graduation.com.dto.product.ProductRegisterRequest;
 import GraduationWorkSalesProject.graduation.com.entity.product.Category;
-import GraduationWorkSalesProject.graduation.com.entity.product.CategoryProduct;
+import GraduationWorkSalesProject.graduation.com.entity.product.Hashtag;
 import GraduationWorkSalesProject.graduation.com.entity.product.Like;
 import GraduationWorkSalesProject.graduation.com.entity.product.Product;
 import GraduationWorkSalesProject.graduation.com.repository.*;
@@ -23,43 +22,25 @@ public class ProductService {
 
     private final CategoryRepository categoryRepository;
 
-    private final CategoryProductRepository categoryProductRepository;
-
     private final MemberRepository memberRepository;
 
     private final HashtagRepository hashtagRepository;
 
-    private final ProductHashtagRepository productHashtagRepository;
 
-    //상품 등록, 수정, 조회, 삭제
     @Transactional
-    public Long saveProduct(ProductRegisterRequest productRegisterRequest) {
-
-        Product product = productRegisterRequest.convert();
+    public Long saveProduct(Product product) {
         productRepository.save(product);
-
         return product.getId();
     }
 
     @Transactional
-    void deleteProduct(Long product_id) {
+    public void deleteProduct(Long product_id) {
         productRepository.deleteById(product_id);
     }
 
     @Transactional
     public Optional<Product> getProduct(Long product_id){
         return productRepository.findById(product_id);
-    }
-
-    //어떤 순서로?
-    @Transactional
-    public List<Product> getAllProduct() {
-        return productRepository.findAll();
-    }
-
-    @Transactional
-    public List<Product> getAllProductByCategory(Long category_id) {
-        return productRepository.findProductsByCategoriesId(category_id);
     }
 
     @Transactional
@@ -132,7 +113,7 @@ public class ProductService {
 
     @Transactional
     public List<Product> getCategoryProducts(Long category_id){
-        return categoryProductRepository.findProductsByCategoryId(category_id);
+        return categoryRepository.findById(category_id).get().getProducts();
     }
 
     @Transactional
@@ -140,23 +121,25 @@ public class ProductService {
         categoryRepository.deleteById(category_id);
     }
 
-
-
-    @Transactional
-    public void saveCategoryProduct(CategoryProduct categoryProduct){
-        categoryProductRepository.save(categoryProduct);
-    }
-
     @Transactional
     public void saveCategory(Category category){
         categoryRepository.save(category);
     }
 
+    @Transactional
+    public void saveHashtag(Hashtag hashtag){
+        hashtagRepository.save(hashtag);
+    }
 
-    //검색시에 해시태그 + 상품명?
-    //해시태그는 몇개까지? 지정해서 검색 가능?
-    //해시태그는 상품 등록할때? 카테고리는 등록할 때 지정하는 것 알겠음
-    //한 상품이 카테고리 2개에 속할 수도 있나...?
+    @Transactional
+    public List<Product> getHashtagSearchResult(Long hashtag_id){
+        return hashtagRepository.findHashtagById(hashtag_id).getHashtagproducts();
+    }
+
+    @Transactional
+    public Hashtag getHashtagByHashtagName(String hashtagName){
+        return hashtagRepository.findHashtagByHashtagName(hashtagName);
+    }
 
 
 }

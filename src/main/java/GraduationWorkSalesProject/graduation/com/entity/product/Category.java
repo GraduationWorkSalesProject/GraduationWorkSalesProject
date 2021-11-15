@@ -1,9 +1,6 @@
 package GraduationWorkSalesProject.graduation.com.entity.product;
 
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -24,19 +21,24 @@ public class Category {
     @Column(name = "category_name")
     private String categoryName;
 
-    @OneToMany(mappedBy = "category")
-    private List<CategoryProduct> products = new ArrayList<>();
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(name = "category_product",
+            joinColumns = @JoinColumn(name = "category_id"),
+            inverseJoinColumns = @JoinColumn(name = "product_id"))
+    private List<Product> products = new ArrayList<Product>();
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "category_parent_id")
     private Category parent;
 
-    @OneToMany(mappedBy = "parent")
+    @OneToMany(mappedBy = "parent",fetch = FetchType.EAGER)
     private List<Category> child = new ArrayList<Category>();
 
-    public void addCategoryProduct(CategoryProduct categoryProduct){
-        products.add(categoryProduct);
-        categoryProduct.setCategory(this);
+    public void addProduct(Product product){
+        products.add(product);
+        List<Category> categoryList = product.getCategories();
+        categoryList.add(this);
+        product.setCategories(categoryList);
     }
 
     public void addCategoryChild(Category category){
@@ -48,5 +50,12 @@ public class Category {
         this.parent = category;
         category.addCategoryChild(this);
     }
+
+    @Builder
+    public Category(String categoryName, Category parent){
+        this.categoryName = categoryName;
+        this.parent = parent;
+    }
+
 
 }

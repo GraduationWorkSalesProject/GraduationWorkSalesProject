@@ -85,7 +85,7 @@ public class Member {
         //  이미지 저장소 url 필요
         //  이미지 저장소에 기본 이미지 저장 필요
         //  이미지 타입 논의 필요
-        this.image = new Image("init image", "init uuid", "jpg");
+        this.image = new Image("init image", "init uuid", "jpg","defaultlink");
     }
 
     public void encryptPassword(String encryptedPassword) {

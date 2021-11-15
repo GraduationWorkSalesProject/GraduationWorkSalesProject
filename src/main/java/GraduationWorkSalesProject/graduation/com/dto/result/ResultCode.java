@@ -33,6 +33,14 @@ public enum ResultCode {
     BEST_PRODUCTS_GET_SUCCESS(200, "P104" ,"인기 상품 불러오기 성공"),
     RECENT_PRODUCTS_GET_SUCCESS(200, "P105" ,"최근 상품 불러오기 성공"),
     SEARCH_PRODUCTS_GET_SUCCESS(200, "P106" ,"검색 상품 불러오기 성공"),
+    CATEGORY_REGISTER_SUCCESS(200,"P107","카테고리가 성공적으로 등록되었습니다."),
+    HASHTAG_REGISTER_SUCCESS(200,"P108","해시태그가 성공적으로 등록되었습니다."),
+    MEMBER_LIKE_PRODUCTS_GET_SUCCESS(200,"P109","회원이 좋아요한 상품 전체 불러오기 성공"),
+    PRODUCT_LIKE_SUCCESS(200,"P110","상품 좋아요가 성공적으로 등록되었습니다."),
+    PRODUCT_LIKE_UNDO_SUCCESS(200,"P111","상품 좋아요가 성공적으로 취소되었습니다."),
+    PRODUCT_LIKE_NUM_SUCCESS(200,"P112","상품 좋아요 숫자 불러오기 성공"),
+    PRODUCT_DELETE_SUCCESS(200,"P113","상품 삭제 성공"),
+    CATEGORY_DELETE_SUCCESS(200,"p114","카테고리 삭제 성공")
     ;
 
 

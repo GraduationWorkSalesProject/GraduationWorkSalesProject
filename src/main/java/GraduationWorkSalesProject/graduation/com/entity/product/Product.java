@@ -33,10 +33,13 @@ public class Product {
 
     //length limit of product info?
     @Column(length = 1000, name = "product_information")
-    private String productInforamtion;
+    private String productInformation;
 
-    @OneToMany(mappedBy = "product")
-    private List<CategoryProduct> categories = new ArrayList<>();
+    @ManyToMany(mappedBy = "products", fetch = FetchType.EAGER)
+    private List<Category> categories = new ArrayList<Category>();
+
+    @ManyToMany(mappedBy = "hashtagproducts", fetch = FetchType.LAZY)
+    private List<Hashtag> hashtags = new ArrayList<Hashtag>();
 
     @Column(name = "product_register_date")
     @CreatedDate
@@ -48,13 +51,14 @@ public class Product {
     private Timestamp productUpdateDate;
 
     @Column(name = "product_rating")
-    private int productRating = 0;
+    private int productRating;
 
     @Embedded
     @AttributeOverrides({
             @AttributeOverride(name = "imageName", column = @Column(name = "product_representation_image_name")),
             @AttributeOverride(name = "imageUuid", column = @Column(name = "product_representation_image_uuid")),
-            @AttributeOverride(name = "imageType", column = @Column(name = "product_representation_image_type"))
+            @AttributeOverride(name = "imageType", column = @Column(name = "product_representation_image_type")),
+            @AttributeOverride(name = "imageHref", column = @Column(name = "product_representation_image_href"))
     })
     private Image productRepresentationImage;
 
@@ -62,7 +66,7 @@ public class Product {
     public Product(String productName,int productPrice,String productInformation,int productRating){
         this.productName = productName;
         this.productPrice = productPrice;
-        this.productInforamtion = productInformation;
+        this.productInformation = productInformation;
         this.productRating = productRating;
     }
 }

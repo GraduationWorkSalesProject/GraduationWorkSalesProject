@@ -24,7 +24,8 @@ public class ProductImage {
     @AttributeOverrides({
             @AttributeOverride(name = "imageName", column = @Column(name = "product_image_name")),
             @AttributeOverride(name = "imageUuid", column = @Column(name = "product_image_uuid")),
-            @AttributeOverride(name = "imageType", column = @Column(name = "product_image_type"))
+            @AttributeOverride(name = "imageType", column = @Column(name = "product_image_type")),
+            @AttributeOverride(name = "imageHref", column = @Column(name = "product_image_href"))
     })
     private Image product_image;
 

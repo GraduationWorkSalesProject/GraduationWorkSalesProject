@@ -1,15 +1,13 @@
 package GraduationWorkSalesProject.graduation.com.vo;
 
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import javax.persistence.Embeddable;
 import java.util.Objects;
 
 @Embeddable
 @Getter
+@Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 public class Image {
@@ -17,10 +15,11 @@ public class Image {
     private String imageName;
     private String imageUuid;
     private String imageType;
+    private String imageHref;
 
     @Override
     public int hashCode() {
-        return Objects.hash(getImageName(), getImageType(), getImageUuid());
+        return Objects.hash(getImageName(), getImageType(), getImageUuid(), getImageHref());
     }
 
     @Override

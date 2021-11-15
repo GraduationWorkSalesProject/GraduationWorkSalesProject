@@ -1,22 +1,21 @@
 package GraduationWorkSalesProject.graduation.com.controller;
 
-import GraduationWorkSalesProject.graduation.com.config.JwtTokenUtil;
-import GraduationWorkSalesProject.graduation.com.dto.member.MemberJwtTokenRequest;
 import GraduationWorkSalesProject.graduation.com.dto.certification.CertificateResponse;
 import GraduationWorkSalesProject.graduation.com.dto.certification.CertificationCodeResponse;
-import GraduationWorkSalesProject.graduation.com.exception.*;
-import GraduationWorkSalesProject.graduation.com.entity.certify.Certificate;
-import GraduationWorkSalesProject.graduation.com.entity.certify.Certification;
-
 import GraduationWorkSalesProject.graduation.com.dto.member.*;
 import GraduationWorkSalesProject.graduation.com.dto.result.ResultCode;
 import GraduationWorkSalesProject.graduation.com.dto.result.ResultResponse;
+import GraduationWorkSalesProject.graduation.com.entity.certify.Certificate;
+import GraduationWorkSalesProject.graduation.com.entity.certify.Certification;
 import GraduationWorkSalesProject.graduation.com.entity.member.Member;
-import GraduationWorkSalesProject.graduation.com.service.*;
+import GraduationWorkSalesProject.graduation.com.exception.EmailNotExistException;
+import GraduationWorkSalesProject.graduation.com.service.MemberService;
 import GraduationWorkSalesProject.graduation.com.service.certificate.CertificateService;
 import GraduationWorkSalesProject.graduation.com.service.certification.CertificationService;
 import GraduationWorkSalesProject.graduation.com.service.mail.MailServiceGmailSMTP;
-import io.swagger.annotations.*;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;

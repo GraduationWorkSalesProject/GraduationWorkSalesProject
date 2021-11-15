@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotEmpty;
+import java.util.List;
 
 @Data
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -24,6 +25,9 @@ public class ProductRegisterRequest {
 
     @NotEmpty(message = "상품은 카테고리에 속해야 합니다")
     private Long category_id;
+
+    private List<String> hashtags;
+
 
     public Product convert(){
         return Product.builder()

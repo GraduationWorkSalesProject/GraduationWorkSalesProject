@@ -1,14 +1,16 @@
 package GraduationWorkSalesProject.graduation.com.dto.product;
 
 
-import GraduationWorkSalesProject.graduation.com.entity.product.Product;
-import lombok.AllArgsConstructor;
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.util.List;
 
+@Setter
 @Getter
-@AllArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ProductListResponse {
-    List<Product> productList;
+    private List<ProductResponse> productList;
 }
