@@ -1,6 +1,5 @@
 package GraduationWorkSalesProject.graduation.com.controller;
 
-import GraduationWorkSalesProject.graduation.com.config.JwtTokenUtil;
 import GraduationWorkSalesProject.graduation.com.dto.member.MemberJwtTokenRequest;
 import GraduationWorkSalesProject.graduation.com.dto.certification.CertificateResponse;
 import GraduationWorkSalesProject.graduation.com.dto.certification.CertificationCodeResponse;
@@ -20,6 +19,7 @@ import io.swagger.annotations.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -44,6 +44,7 @@ public class MemberController {
     private final CertificateService certificateService;
 
     @ApiOperation(value = "로그인", notes = "로그인 성공 시, JWT 토큰을 Response Header에 넣어서 반환합니다")
+    @ApiImplicitParam(name = "Authorization", value = "불필요", required = false, example = " ")
     @PostMapping(value = "/login", consumes = APPLICATION_JSON_VALUE)
     public ResponseEntity<ResultResponse> login(@Validated @RequestBody MemberLoginRequest request) {
         memberService.checkUseridPassword(request.getUserid(), request.getPassword());
@@ -58,11 +59,12 @@ public class MemberController {
     }
 
     @ApiOperation(value = "JWT 토큰 재발급", notes = "재발급 성공 시, JWT 토큰을 Response Header에 넣어서 반환합니다")
+    @ApiImplicitParam(name = "Authorization", value = "불필요", required = false, example = " ")
     @PostMapping(value = "/reissue", consumes = APPLICATION_JSON_VALUE)
     public ResponseEntity<ResultResponse> reIssueAccessToken(@Validated @RequestBody MemberJwtTokenRequest request) {
         memberService.validateJwts(request.getAccessToken(), request.getRefreshToken());
 
-        final String username = memberService.getUsernameFromRefreshJwt(request.getRefreshToken());
+        final String username = SecurityContextHolder.getContext().getAuthentication().getName();
         final String accessToken = memberService.createAccessTokenByUsername(username);
 
         return ResponseEntity.ok()
@@ -71,6 +73,7 @@ public class MemberController {
     }
 
     @ApiOperation(value = "이메일 인증 코드 발송")
+    @ApiImplicitParam(name = "Authorization", value = "불필요", required = false, example = " ")
     @PostMapping(value = "/verification/email", consumes = APPLICATION_JSON_VALUE)
     public ResponseEntity<ResultResponse> sendCertificationCode(@Validated @RequestBody MemberEmailCertificationRequest request) {
         final String subject = "[그라듀] 이메일 인증코드 안내";
@@ -86,6 +89,7 @@ public class MemberController {
     }
 
     @ApiOperation(value = "인증 코드 검증")
+    @ApiImplicitParam(name = "Authorization", value = "불필요", required = false, example = " ")
     @PostMapping(value = "/verification/code", consumes = APPLICATION_JSON_VALUE)
     public ResponseEntity<ResultResponse> verifyCertificationCode(@Validated @RequestBody MemberCertificationCodeRequest request) {
         certificationService.validateCertification(request);
@@ -101,6 +105,7 @@ public class MemberController {
     }
 
     @ApiOperation(value = "이메일 중복 체크")
+    @ApiImplicitParam(name = "Authorization", value = "불필요", required = false, example = " ")
     @PostMapping(value = "/overlap/email", consumes = APPLICATION_JSON_VALUE)
     public ResponseEntity<ResultResponse> checkEmailExists(@Validated @RequestBody MemberEmailCheckRequest request) {
         final Optional<Member> findMember = memberService.findOneByEmail(request.getEmail());
@@ -110,6 +115,7 @@ public class MemberController {
     }
 
     @ApiOperation(value = "아이디 중복 체크")
+    @ApiImplicitParam(name = "Authorization", value = "불필요", required = false, example = " ")
     @PostMapping(value = "/overlap/userid", consumes = APPLICATION_JSON_VALUE)
     public ResponseEntity<ResultResponse> checkUseridExists(@Validated @RequestBody MemberUseridCheckRequest request) {
         final Optional<Member> findMember = memberService.findOneByUserid(request.getUserid());
@@ -119,6 +125,7 @@ public class MemberController {
     }
 
     @ApiOperation(value = "닉네임 중복 체크")
+    @ApiImplicitParam(name = "Authorization", value = "불필요", required = false, example = " ")
     @PostMapping(value = "/overlap/username", consumes = APPLICATION_JSON_VALUE)
     public ResponseEntity<ResultResponse> checkUsernameExists(@Validated @RequestBody MemberUsernameCheckRequest request) {
         final Optional<Member> findMember = memberService.findOneByUsername(request.getUsername());
@@ -128,6 +135,7 @@ public class MemberController {
     }
 
     @ApiOperation(value = "회원가입")
+    @ApiImplicitParam(name = "Authorization", value = "불필요", required = false, example = " ")
     @PostMapping(value = "/join", consumes = APPLICATION_JSON_VALUE)
     public ResponseEntity<ResultResponse> join(@Validated @RequestBody MemberJoinRequest request) {
         certificateService.validateCertificate(request.getToken());
@@ -138,21 +146,21 @@ public class MemberController {
     }
 
     @ApiOperation(value = "회원탈퇴")
-    @ApiImplicitParam(name = "Authorization", value = "권한", example = "Bearer xxx.yyy.zzz")
     @DeleteMapping("/leave")
-    public ResponseEntity<ResultResponse> leave(@RequestHeader("Authorization") String authorization) {
-        final String username = memberService.getUsernameFromAccessJwt(authorization);
+    public ResponseEntity<ResultResponse> leave() {
+        final String username = SecurityContextHolder.getContext().getAuthentication().getName();
         memberService.removeOneByUsername(username);
 
         return ResponseEntity.ok(ResultResponse.of(LEAVE_SUCCESS, null));
     }
 
     @ApiOperation(value = "아이디 찾기")
+    @ApiImplicitParam(name = "Authorization", value = "불필요", required = false, example = " ")
     @PostMapping(value = "/help/id", consumes = APPLICATION_JSON_VALUE)
     public ResponseEntity<ResultResponse> helpFindUserid(@Validated @RequestBody MemberHelpFindUseridRequest request) {
         certificateService.validateCertificate(request.getToken());
 
-        final Member member = memberService.findOneByEmail(request.getEmail()).orElseThrow(EmailNotExistException::new);
+        final Member member = memberService.findOneByEmail(request.getEmail()).orElseThrow(EmailNotFoundException::new);
         final MemberFindUseridResponse response = new MemberFindUseridResponse(member.getUserid());
         certificateService.delete(request.getToken());
 
@@ -160,6 +168,7 @@ public class MemberController {
     }
 
     @ApiOperation(value = "비밀번호 찾기")
+    @ApiImplicitParam(name = "Authorization", value = "불필요", required = false, example = " ")
     @PostMapping(value = "/help/password", consumes = APPLICATION_JSON_VALUE)
     public ResponseEntity<ResultResponse> helpChangePassword(@Validated @RequestBody MemberHelpFindPasswordRequest request) {
         certificateService.validateCertificate(request.getToken());
