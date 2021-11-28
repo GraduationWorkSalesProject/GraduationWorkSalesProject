@@ -61,7 +61,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
             request.setAttribute("errorCode", EXPIRED_ACCESS_TOKEN);
         } catch (JwtException e) {
             log.warn("Unable to get JWT Token");
-            request.setAttribute("errorCode", INVALID_TOKEN);
+            request.setAttribute("errorCode", INVALID_JWT);
         }
 
         filterChain.doFilter(request, response);

@@ -38,7 +38,7 @@ public class CertificateDbService implements CertificateService {
         ZonedDateTime now = ZonedDateTime.now(ZoneId.of("Asia/Seoul"));
         Optional<Certificate> findCertificate = certificateRepository.findById(token);
 
-        if (findCertificate.isEmpty() || !findCertificate.get().getToken().equals(token))
+        if (findCertificate.isEmpty())
             throw new InvalidCertificateException();
 
         LocalDateTime expirationDateTime = findCertificate.get().getExpirationDateTime();

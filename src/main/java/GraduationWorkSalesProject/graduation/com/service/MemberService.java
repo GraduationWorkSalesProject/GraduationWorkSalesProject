@@ -2,12 +2,12 @@ package GraduationWorkSalesProject.graduation.com.service;
 
 import GraduationWorkSalesProject.graduation.com.config.JwtTokenUtil;
 import GraduationWorkSalesProject.graduation.com.dto.member.MemberJoinRequest;
-import GraduationWorkSalesProject.graduation.com.dto.member.MemberJwtTokenRequest;
 import GraduationWorkSalesProject.graduation.com.dto.member.MemberLoginRequest;
 import GraduationWorkSalesProject.graduation.com.entity.member.Member;
 import GraduationWorkSalesProject.graduation.com.exception.*;
 import GraduationWorkSalesProject.graduation.com.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -48,7 +48,7 @@ public class MemberService {
 
     @Transactional
     public void changePassword(String userid, String newPassword, String checkPassword) {
-        Member findMember = memberRepository.findByUserid(userid).orElseThrow(UseridNotExistException::new);
+        Member findMember = memberRepository.findByUserid(userid).orElseThrow(UseridNotFoundException::new);
         if (!newPassword.equals(checkPassword))
             throw new PasswordNotMatchException();
 
@@ -82,18 +82,16 @@ public class MemberService {
 
     @Transactional
     public String updateRefreshToken(MemberLoginRequest request) {
-        final Member member = memberRepository.findByUserid(request.getUserid()).orElseThrow(UseridNotExistException::new);
-        if (member.getRefreshToken() == null) {
-            jwtTokenUtil.validateRefreshToken(member.getRefreshToken());
-            final UserDetails userDetails = userDetailsService.loadUserByUsername(member.getUsername());
-            final String refreshToken = jwtTokenUtil.generateRefreshToken(userDetails);
-            member.updateRefreshToken(refreshToken);
-        }
-        return member.getRefreshToken();
+        final Member member = memberRepository.findByUserid(request.getUserid()).orElseThrow(UseridNotFoundException::new);
+        final UserDetails userDetails = userDetailsService.loadUserByUsername(member.getUsername());
+        final String refreshToken = jwtTokenUtil.generateRefreshToken(userDetails);
+
+        member.updateRefreshToken(refreshToken);
+        return refreshToken;
     }
 
     public String createAccessTokenByUserid(String userid) {
-        final Member member = memberRepository.findByUserid(userid).orElseThrow(UseridNotExistException::new);
+        final Member member = memberRepository.findByUserid(userid).orElseThrow(UseridNotFoundException::new);
         final UserDetails userDetails = userDetailsService.loadUserByUsername(member.getUsername());
         return jwtTokenUtil.generateAccessToken(userDetails);
     }
@@ -103,20 +101,9 @@ public class MemberService {
         return jwtTokenUtil.generateAccessToken(userDetails);
     }
 
-    public String getUsernameFromAccessJwt(String accessToken) {
-        return jwtTokenUtil.getUsernameFromAccessToken(accessToken.substring(7));
-    }
-
-    public String getUsernameFromRefreshJwt(String refreshToken) {
-        final String username = jwtTokenUtil.getUsernameFromRefreshToken(refreshToken);
-        checkRefreshToken(refreshToken);
-
-        return username;
-    }
-
     private void checkRefreshToken(String refreshToken){
-        final String username = getUsernameFromRefreshJwt(refreshToken);
-        final Member member = memberRepository.findByUsername(username).orElseThrow(UseridNotExistException::new);
+        final String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        final Member member = memberRepository.findByUsername(username).orElseThrow(UseridNotFoundException::new);
         if (!member.getRefreshToken().equals(refreshToken))
             throw new RefreshTokenNotMatchException();
     }
@@ -124,5 +111,6 @@ public class MemberService {
     public void validateJwts(String accessToken, String refreshToken) {
         jwtTokenUtil.validateAccessToken(accessToken);
         jwtTokenUtil.validateRefreshToken(refreshToken);
+        checkRefreshToken(refreshToken);
     }
 }

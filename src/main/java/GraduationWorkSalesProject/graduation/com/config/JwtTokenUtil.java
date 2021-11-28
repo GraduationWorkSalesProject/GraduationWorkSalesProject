@@ -31,26 +31,13 @@ public class JwtTokenUtil {
         return getClaimFromAccessToken(token, Claims::getSubject);
     }
 
-    public String getUsernameFromRefreshToken(String token) {
-        return getClaimFromRefreshToken(token, Claims::getSubject);
-    }
-
     public <T> T getClaimFromAccessToken(String token, Function<Claims, T> claimsResolver) {
         Claims claims = getAllClaimsFromAccessToken(token);
         return claimsResolver.apply(claims);
     }
 
-    public <T> T getClaimFromRefreshToken(String token, Function<Claims, T> claimsResolver) {
-        Claims claims = getAllClaimsFromRefreshToken(token);
-        return claimsResolver.apply(claims);
-    }
-
     private Claims getAllClaimsFromAccessToken(String token) {
         return Jwts.parser().setSigningKey(ACCESS_TOKEN_SECRET).parseClaimsJws(token).getBody();
-    }
-
-    private Claims getAllClaimsFromRefreshToken(String token) {
-        return Jwts.parser().setSigningKey(REFRESH_TOKEN_SECRET).parseClaimsJws(token).getBody();
     }
 
     public String generateAccessToken(UserDetails userDetails) {
@@ -83,15 +70,13 @@ public class JwtTokenUtil {
     }
 
     public void validateRefreshToken(String token) {
-        if (validateToken(token, REFRESH_TOKEN_SECRET))
+        if (!validateToken(token, REFRESH_TOKEN_SECRET))
             throw new ExpiredRefreshTokenException();
     }
 
     private Boolean validateToken(String token, String secret) {
         try {
             Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody();
-        } catch (SignatureException e) {
-            throw new SignatureException(null);
         } catch (ExpiredJwtException e) {
             return false;
         } catch (JwtException e) {
