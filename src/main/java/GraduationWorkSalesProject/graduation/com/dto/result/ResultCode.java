@@ -23,8 +23,13 @@ public enum ResultCode {
     USERNAME_DUPLICATION(200, "M109", "이미 사용중인 닉네임입니다."),
     FIND_USERID_SUCCESS(200, "M110", "회원 아이디 찾기 성공"),
     CHANGE_PASSWORD_SUCCESS(200, "M111", "회원 비밀번호 변경 성공"),
-    CERTIFY_EMAIL_SUCCESS(200, "M112", "회원 이메일 인증 성공")
-    ;
+    CERTIFY_EMAIL_SUCCESS(200, "M112", "회원 이메일 인증 성공"),
+
+
+
+	//Seller
+	SELLER_REGISTER_SUCCESS(200, "S100", "판매자 등록에 성공 행습니다."),
+	CHANGE_SELLER_INFORMATION_SUCCESS(200, "S100", "판매자 정보 변경에 성공 행습니다.");
 
     private int status;
     private final String code;

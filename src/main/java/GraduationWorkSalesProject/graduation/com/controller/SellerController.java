@@ -1,35 +1,47 @@
 package GraduationWorkSalesProject.graduation.com.controller;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import GraduationWorkSalesProject.graduation.com.dto.result.ResultCode;
 import GraduationWorkSalesProject.graduation.com.dto.result.ResultResponse;
-import GraduationWorkSalesProject.graduation.com.dto.seller.SellerRequest;
+import GraduationWorkSalesProject.graduation.com.dto.seller.SellerRegisterRequest;
 import GraduationWorkSalesProject.graduation.com.service.SellerService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
-
+import lombok.extern.slf4j.Slf4j;
 
 @Api(tags = "판매자 API")
-@CrossOrigin
 @RestController
 @RequiredArgsConstructor
+@Slf4j
 public class SellerController {
 
-	private static final Logger log = LoggerFactory.getLogger(SellerController.class);
-	private final SellerService SellerService;
+	private final SellerService sellerService;
 
-	@ApiOperation(value = "판매자 정보 변경")
-	@PostMapping(value = "/sellers/profile")
-	public ResponseEntity<ResultResponse> updateSellerProfile(@ModelAttribute SellerRequest request) {
-		log.info(request.getSellerAccount());
-		return null;
+	/**
+	 * 판매자 등록
+	 *
+	 * @param sellerRegisterRequest
+	 * @return ResponseEntity
+	 */
+	@ApiOperation(value = "판매자 등록")
+	@PostMapping(value = "/sellers", consumes = APPLICATION_JSON_VALUE)
+	public ResponseEntity<ResultResponse> register(@Validated @RequestBody SellerRegisterRequest sellerRegisterRequest) {
+		Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		UserDetails userDetails = (UserDetails) principal;
+		log.info("Username : " + userDetails.getUsername() + "Password : " + userDetails.getPassword());
+
+		sellerService.register(sellerRegisterRequest, userDetails.getUsername());
+		return ResponseEntity.ok(ResultResponse.of(ResultCode.SELLER_REGISTER_SUCCESS, null));
 	}
 
 }

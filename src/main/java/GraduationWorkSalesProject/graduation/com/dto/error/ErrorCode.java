@@ -30,6 +30,9 @@ public enum ErrorCode {
     USERID_NOT_FOUND(400, "M007", "해당 아이디의 회원은 존재하지 않습니다"),
     USERNAME_NOT_FOUND(400, "M008", "해당 닉네임의 회원은 존재하지 않습니다"),
     EXPIRED_CERTIFICATION_CODE(400, "M009", "만료된 인증 코드입니다."),
+
+    //Seller
+    SELLER_REGISTER_INPUT_DUPLICATION(400, "S001", "판매자로 이미 존재합니다."),
     ;
 
     private int status;
