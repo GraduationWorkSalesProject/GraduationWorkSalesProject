@@ -52,7 +52,7 @@ public class SellerController {
 	 * @return ResponseEntity
 	 */
 	@ApiOperation(value = "판매자 정보 조회")
-	@GetMapping(value = "/sellers")
+	@GetMapping(value = "/sellers/profile")
 	public ResponseEntity<ResultResponse> getSellerInfo() {
 		log.info("판매자 정보 조회");
 		Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
