@@ -9,8 +9,10 @@ import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
+import GraduationWorkSalesProject.graduation.com.dto.seller.SellerResponse;
 import GraduationWorkSalesProject.graduation.com.entity.member.Member;
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -19,6 +21,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "sellers")
 @Entity
+@AllArgsConstructor
+@Builder
 public class Seller {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -41,15 +45,16 @@ public class Seller {
     @JoinColumn(name="member_id")
     private Member member;
 
-    @Builder
-    public Seller(String sellerInformation, String sellerName, String sellerBank, String sellerAccount, Member member) {
-    	this.sellerInformation = sellerInformation;
-    	this.sellerName = sellerName;
-    	this.sellerBank = sellerBank;
-    	this.sellerAccount = sellerAccount;
-    	this.member = member;
-    }
-
+    public SellerResponse convert() {
+    	return SellerResponse.builder()
+    			.id(id)
+    			.sellerInformation(sellerInformation)
+    			.sellerName(sellerName)
+    			.sellerBank(sellerBank)
+    			.sellerAccount(sellerAccount)
+    			.memberId(member.getId())
+    			.build();
+	}
 
 
 }
