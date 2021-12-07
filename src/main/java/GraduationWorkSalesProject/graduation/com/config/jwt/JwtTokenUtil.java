@@ -1,4 +1,4 @@
-package GraduationWorkSalesProject.graduation.com.config;
+package GraduationWorkSalesProject.graduation.com.config.jwt;
 
 import GraduationWorkSalesProject.graduation.com.exception.ExpiredRefreshTokenException;
 import GraduationWorkSalesProject.graduation.com.exception.InvalidJwtException;

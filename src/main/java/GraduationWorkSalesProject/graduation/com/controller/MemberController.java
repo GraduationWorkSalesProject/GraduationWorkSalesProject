@@ -47,7 +47,7 @@ public class MemberController {
     @ApiImplicitParam(name = "Authorization", value = "불필요", required = false, example = " ")
     @PostMapping(value = "/login", consumes = APPLICATION_JSON_VALUE)
     public ResponseEntity<ResultResponse> login(@Validated @RequestBody MemberLoginRequest request) {
-        memberService.checkUseridPassword(request.getUserid(), request.getPassword());
+        final LoginResponse response = memberService.checkUseridPassword(request.getUserid(), request.getPassword());
 
         final String accessToken = memberService.createAccessTokenByUserid(request.getUserid());
         final String refreshToken = memberService.updateRefreshToken(request);
@@ -55,7 +55,7 @@ public class MemberController {
         return ResponseEntity.ok()
                 .header("access-token", accessToken)
                 .header("refresh-token", refreshToken)
-                .body(ResultResponse.of(LOGIN_SUCCESS, null));
+                .body(ResultResponse.of(LOGIN_SUCCESS, response));
     }
 
     @ApiOperation(value = "JWT 토큰 재발급", notes = "재발급 성공 시, JWT 토큰을 Response Header에 넣어서 반환합니다")
