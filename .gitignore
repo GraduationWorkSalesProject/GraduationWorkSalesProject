@@ -5,6 +5,7 @@ keys
 settings.gradle
 .gradle
 docker-compose.yml
+system.properties
 Dockerfile
 build/
 src/main/resources/application.yml

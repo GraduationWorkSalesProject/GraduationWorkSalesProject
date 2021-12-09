@@ -1,5 +1,6 @@
 package GraduationWorkSalesProject.graduation.com.dto.product;
 
+import GraduationWorkSalesProject.graduation.com.exception.ProductImageNotExistException;
 import GraduationWorkSalesProject.graduation.com.vo.Image;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -24,7 +25,7 @@ public class ImageLinkResponse {
         String returnLink = "uc?export=view&id=";
 
         //replace sharelinktop & return link and erase sharedlinkend by split
-        String[] result = image.get().getImageHref().replace(shareLinkTop,returnLink).split(shareLinkEnd);
+        String[] result = image.orElseThrow(ProductImageNotExistException::new).getImageHref().replace(shareLinkTop,returnLink).split(shareLinkEnd);
 
         this.imageName = image.get().getImageName();
         this.imageUuid = image.get().getImageUuid();

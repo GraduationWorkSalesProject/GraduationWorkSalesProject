@@ -1,15 +1,18 @@
 package GraduationWorkSalesProject.graduation.com.entity.product;
 
 
+import GraduationWorkSalesProject.graduation.com.entity.member.Member;
 import GraduationWorkSalesProject.graduation.com.vo.Image;
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
 import java.sql.Timestamp;
-import java.util.ArrayList;
 import java.util.List;
 
 @NoArgsConstructor(access= AccessLevel.PROTECTED)
@@ -24,6 +27,10 @@ public class Product {
     @Column(name = "product_id")
     private Long id;
 
+    @OneToOne
+    @JoinColumn(name="member_id")
+    private Member member;
+
     @Column(length = 20, name = "product_name")
     private String name;
 
@@ -34,11 +41,8 @@ public class Product {
     @Column(length = 1000, name = "product_information")
     private String information;
 
-    @ManyToMany(mappedBy = "products", fetch = FetchType.LAZY)
-    private List<Category> categories = new ArrayList<Category>();
-
-    @ManyToMany(mappedBy = "hashtagproducts", fetch = FetchType.LAZY)
-    private List<Hashtag> hashtags = new ArrayList<Hashtag>();
+    @OneToMany(mappedBy = "product", fetch = FetchType.LAZY)
+    private List<ProductHashtag> productHashtags;
 
     @Column(name = "product_register_date")
     @CreatedDate
@@ -51,6 +55,12 @@ public class Product {
 
     @Column(name = "product_rating")
     private int rating;
+
+    @Column(name = "product_delivery_term")
+    private int term;
+
+    @Column(name = "product_delivery_price")
+    private int deliveryPrice;
 
     @Embedded
     @AttributeOverrides({
@@ -68,4 +78,5 @@ public class Product {
         this.information = information;
         this.rating = rating;
     }
+
 }
