@@ -20,25 +20,16 @@ public class Category {
     @Column(name = "category_name")
     private String categoryName;
 
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(name = "category_product",
-            joinColumns = @JoinColumn(name = "category_id"),
-            inverseJoinColumns = @JoinColumn(name = "product_id"))
-    private List<Product> products = new ArrayList<Product>();
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_parent_id")
     private Category parent;
 
+    @OneToMany(mappedBy = "category",fetch = FetchType.LAZY)
+    private List<CategoryProduct> categoryProducts;
+
     @OneToMany(mappedBy = "parent",fetch = FetchType.LAZY)
     private List<Category> child = new ArrayList<Category>();
-
-    public void addProduct(Product product){
-        products.add(product);
-        List<Category> categoryList = product.getCategories();
-        categoryList.add(this);
-        //product.setCategories(categoryList);
-    }
 
     public void addCategoryChild(Category category){
         child.add(category);

@@ -1,6 +1,7 @@
 package GraduationWorkSalesProject.graduation.com.dto.product;
 
 import GraduationWorkSalesProject.graduation.com.entity.product.Product;
+import GraduationWorkSalesProject.graduation.com.entity.seller.Seller;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -21,19 +22,21 @@ public class ProductResponse {
     private Timestamp productRegisterDate;
     private Timestamp productUpdateDate;
     private int productRating;
+    private int productDeliveryTerm;
+    private int productDeliveryPrice;
+    private Seller seller;
 
     public ProductResponse(Product product) {
         this.id = product.getId();
         this.productName = product.getName();
-        this.categoryId = product.getCategories().get(0).getId();
-        this.categoryName = product.getCategories().get(0).getCategoryName();
         this.productPrice = product.getPrice();
         this.productInformation = product.getInformation();
         this.productRegisterDate = product.getRegisterDate();
         this.productUpdateDate = product.getUpdateDate();
         this.productRating = product.getRating();
+        this.productDeliveryTerm = product.getTerm();
+        this.productDeliveryPrice = product.getDeliveryPrice();
 
     }
-
 
 }

@@ -1,10 +1,12 @@
 package GraduationWorkSalesProject.graduation.com.dto.seller;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 
 @AllArgsConstructor
 @Getter
+@Builder
 public class SellerResponse {
 	private Long id;
 
@@ -17,4 +19,5 @@ public class SellerResponse {
 	private String sellerAccount;
 
 	private Long memberId;
+
 }

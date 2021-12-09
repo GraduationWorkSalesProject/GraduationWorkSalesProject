@@ -34,10 +34,6 @@ public class ProductRegisterRequest {
 
     private List<String> hashtags;
 
-
-    private List<String> hashtags;
-
-
     public Product convert(){
         return Product.builder()
                 .name(getProductName())

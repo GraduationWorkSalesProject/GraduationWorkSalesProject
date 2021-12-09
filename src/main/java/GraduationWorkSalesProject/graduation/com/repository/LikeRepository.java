@@ -5,7 +5,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 public interface LikeRepository extends JpaRepository<Like, Long>{
@@ -14,7 +13,7 @@ public interface LikeRepository extends JpaRepository<Like, Long>{
     Long countLikeByProductId(Long product_id);
     Optional<Like> findByMemberIdAndProductId(Long member_id, Long product_id);
     @Query(value = "select count(l) as cnt, l.product.id from Like l group by l.product order by cnt desc")
-    Map<Integer,Integer> findTopByLikeWithJPQL();
+    List<Object[]> findTop8ByLikeWithJPQL();
 
 
 }

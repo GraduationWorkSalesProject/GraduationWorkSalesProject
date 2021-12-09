@@ -1,6 +1,7 @@
 package GraduationWorkSalesProject.graduation.com.service;
 
-import GraduationWorkSalesProject.graduation.com.config.JwtTokenUtil;
+import GraduationWorkSalesProject.graduation.com.config.jwt.JwtTokenUtil;
+import GraduationWorkSalesProject.graduation.com.dto.member.LoginResponse;
 import GraduationWorkSalesProject.graduation.com.dto.member.MemberJoinRequest;
 import GraduationWorkSalesProject.graduation.com.dto.member.MemberLoginRequest;
 import GraduationWorkSalesProject.graduation.com.entity.member.Member;
@@ -55,10 +56,24 @@ public class MemberService {
         findMember.encryptPassword(bCryptPasswordEncoder.encode(newPassword));
     }
 
-    public void checkUseridPassword(String userid, String password) {
-        Optional<Member> findMember = memberRepository.findByUserid(userid);
-        if (findMember.isEmpty() || !bCryptPasswordEncoder.matches(password, findMember.get().getPassword()))
+    public LoginResponse checkUseridPassword(String userid, String password) {
+        Member findMember = memberRepository.findByUserid(userid).orElseThrow(LoginInvalidInputException::new);
+        if (!bCryptPasswordEncoder.matches(password, findMember.getPassword()))
             throw new LoginInvalidInputException();
+
+        LoginResponse response = LoginResponse.builder()
+                .userid(findMember.getUserid())
+                .username(findMember.getUsername())
+                .email(findMember.getEmail())
+                .phoneNumber(findMember.getPhoneNumber())
+                .imageUrl(findMember.getImage().getImageHref())
+                .joinedDate(findMember.getJoinedDate())
+                .role(findMember.getRole())
+                .certificationStatus(findMember.getCertificationStatus())
+                .address(findMember.getAddress())
+                .build();
+
+        return response;
     }
 
     public Optional<Member> findOneByEmail(String email) {

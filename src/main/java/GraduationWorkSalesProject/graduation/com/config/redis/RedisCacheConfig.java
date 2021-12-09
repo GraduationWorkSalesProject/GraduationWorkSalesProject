@@ -1,4 +1,4 @@
-package GraduationWorkSalesProject.graduation.com.config;
+package GraduationWorkSalesProject.graduation.com.config.redis;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.CacheManager;
