@@ -1,5 +1,7 @@
 package GraduationWorkSalesProject.graduation.com.config;
 
+import GraduationWorkSalesProject.graduation.com.config.jwt.JwtAuthenticationEntryPoint;
+import GraduationWorkSalesProject.graduation.com.config.jwt.JwtRequestFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;

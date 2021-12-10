@@ -1,6 +1,7 @@
 package GraduationWorkSalesProject.graduation.com.dto.product;
 
 import GraduationWorkSalesProject.graduation.com.entity.product.Product;
+import GraduationWorkSalesProject.graduation.com.entity.seller.Seller;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -9,11 +10,11 @@ import lombok.Setter;
 
 import java.sql.Timestamp;
 
-@ApiModel(value = "개별 상품 모델")
 @Getter
 @Setter
 @AllArgsConstructor
-public class ProductResponse {
+@ApiModel(value = "상세 상품 모델")
+public class ProductDetailResponse {
 
     @ApiModelProperty(value = "상품 아이디")
     private Long id;
@@ -42,14 +43,25 @@ public class ProductResponse {
     @ApiModelProperty(value = "상품 점수")
     private int productRating;
 
-    @ApiModelProperty(value = "상품 배송기간")
+    @ApiModelProperty(value = "상품 배송 기간")
     private int productDeliveryTerm;
 
     @ApiModelProperty(value = "상품 배송비")
     private int productDeliveryPrice;
 
+    @ApiModelProperty(value = "판매자 아이디")
+    private Long sellerId;
 
-    public ProductResponse(Product product) {
+    @ApiModelProperty(value = "판매자 정보")
+    private String sellerInformation;
+
+    @ApiModelProperty(value = "판매자명")
+    private String sellerName;
+
+    @ApiModelProperty(value = "회원 아이디")
+    private Long memberId;
+
+    public ProductDetailResponse(Product product,Seller seller) {
         this.id = product.getId();
         this.productName = product.getName();
         this.productPrice = product.getPrice();
@@ -59,6 +71,9 @@ public class ProductResponse {
         this.productRating = product.getRating();
         this.productDeliveryTerm = product.getTerm();
         this.productDeliveryPrice = product.getDeliveryPrice();
+        this.sellerId = seller.getId();
+        this.sellerInformation = seller.getSellerInformation();
+        this.sellerName = seller.getSellerName();
+        this.memberId = seller.getMember().getId();
     }
-
 }

@@ -72,11 +72,15 @@ public class Product {
     private Image representationImage;
 
     @Builder
-    public Product(String name,int price,String information,int rating){
+    public Product(Member member,String name,int price,String information,int rating,int term, int deliveryPrice,Image representationImage){
+        this.member = member;
         this.name = name;
         this.price = price;
         this.information = information;
         this.rating = rating;
+        this.term = term;
+        this.deliveryPrice = deliveryPrice;
+        this.representationImage = representationImage;
     }
 
 }

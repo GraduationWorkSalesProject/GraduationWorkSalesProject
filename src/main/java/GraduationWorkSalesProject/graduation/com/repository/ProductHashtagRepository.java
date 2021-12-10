@@ -6,5 +6,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface ProductHashtagRepository extends JpaRepository<ProductHashtag, Long> {
-    List<ProductHashtag> findByHashtag_Id(Long id);
+    List<ProductHashtag> findAllByHashtagId(Long id);
 }

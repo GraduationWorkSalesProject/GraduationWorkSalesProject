@@ -15,6 +15,7 @@ src/main/resources-prod/application-prod.yml
 !gradle/wrapper/gradle-wrapper.jar
 !**/src/main/**/build/
 !**/src/test/**/build/
+src/main/resources/gradu-884f1-firebase-adminsdk-lpnwj-0785611e75.json
 
 ### STS ###
 .apt_generated
