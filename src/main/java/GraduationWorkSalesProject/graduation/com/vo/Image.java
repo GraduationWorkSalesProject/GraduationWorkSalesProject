@@ -32,4 +32,7 @@ public class Image {
         Image image = (Image) obj;
         return Objects.equals(getImageUuid(), image.getImageUuid());
     }
+
+
 }
+
