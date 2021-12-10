@@ -21,14 +21,6 @@ public class Hashtag {
     @Column(name = "hashtag_name")
     private String hashtagName;
 
-    /*
-    public void addProduct(Product product){
-        hashtagproducts.add(product);
-        List<Hashtag> hashtagList = product.getHashtags();
-        hashtagList.add(this);
-        //product.setHashtags(hashtagList);
-    }
-*/
     @Builder
     public Hashtag(String hashtagName){
         this.hashtagName = hashtagName;
