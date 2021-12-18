@@ -24,8 +24,8 @@ public enum ResultCode {
     FIND_USERID_SUCCESS(200, "M110", "회원 아이디 찾기 성공"),
     CHANGE_PASSWORD_SUCCESS(200, "M111", "회원 비밀번호 변경 성공"),
     CERTIFY_EMAIL_SUCCESS(200, "M112", "회원 이메일 인증 성공"),
-
-
+    CHANGE_PROFILE_SUCCESS(200, "M113", "회원 정보 변경 성공"),
+    FIND_PROFILE_SUCCESS(200, "M114", "회원 정보 조회 성공"),
 
 	//Seller
 	SELLER_REGISTER_SUCCESS(200, "S100", "판매자 등록에 성공 행습니다."),
