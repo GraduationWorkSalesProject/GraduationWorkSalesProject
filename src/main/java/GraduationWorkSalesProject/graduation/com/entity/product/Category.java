@@ -27,7 +27,7 @@ public class Category {
     @JoinColumn(name = "category_parent_id")
     private Category parent;
 
-    @OneToMany(mappedBy = "category")
+    @OneToMany(mappedBy = "category",fetch = FetchType.LAZY)
     private List<CategoryProduct> categoryProducts;
 
     @Builder

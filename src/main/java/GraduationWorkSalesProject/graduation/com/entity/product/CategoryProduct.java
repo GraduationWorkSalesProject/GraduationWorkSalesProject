@@ -10,7 +10,7 @@ import javax.persistence.*;
 @Entity
 @Getter
 @NoArgsConstructor(access= AccessLevel.PROTECTED)
-@Table(name = "category_products")
+@Table(name = "category_product")
 public class CategoryProduct {
 
     @Id
@@ -18,11 +18,11 @@ public class CategoryProduct {
     @Column(name = "product_category_id")
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name="product_id")
     private Product product;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name="category_id")
     private Category category;
 
