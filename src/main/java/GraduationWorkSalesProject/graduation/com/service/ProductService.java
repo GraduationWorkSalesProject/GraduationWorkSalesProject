@@ -1,20 +1,17 @@
 package GraduationWorkSalesProject.graduation.com.service;
 
-import GraduationWorkSalesProject.graduation.com.dto.product.CategoryRegisterRequest;
-import GraduationWorkSalesProject.graduation.com.dto.product.HashtagRegisterRequest;
-import GraduationWorkSalesProject.graduation.com.dto.product.ProductRegisterRequest;
-import GraduationWorkSalesProject.graduation.com.dto.product.ProductResponse;
+import GraduationWorkSalesProject.graduation.com.dto.product.*;
 import GraduationWorkSalesProject.graduation.com.entity.product.*;
-import GraduationWorkSalesProject.graduation.com.exception.CategoryNotExistException;
-import GraduationWorkSalesProject.graduation.com.exception.HashtagNotExistException;
-import GraduationWorkSalesProject.graduation.com.exception.LikeNotExistException;
-import GraduationWorkSalesProject.graduation.com.exception.ProductNotExistException;
+import GraduationWorkSalesProject.graduation.com.entity.seller.Seller;
+import GraduationWorkSalesProject.graduation.com.exception.*;
 import GraduationWorkSalesProject.graduation.com.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -35,14 +32,15 @@ public class ProductService {
 
     private final ProductHashtagRepository productHashtagRepository;
 
-
-    //save , delete product
+    private final SellerRepository sellerRepository;
 
     @Transactional
     public void saveProduct(ProductRegisterRequest productRegisterRequest) {
+        if(!productRegisterRequest.getMember().getRole().toString().equals("ROLE_SELLER"))
+            throw new ProductRegisterCertificationException();
+
         Product registerProduct = productRegisterRequest.convert();
         List<String> hashtags = productRegisterRequest.getHashtags();
-
 
         //if hashtag exist => add to product
         //if hashtag not exist => create hashtag and add to product
@@ -71,13 +69,14 @@ public class ProductService {
     }
 
     @Transactional
-    public void deleteProduct(Long product_id) {
-        productRepository.deleteById(product_id);
+    public void deleteProduct(Long productId) {
+        productRepository.deleteById(productId);
     }
 
-    public ProductResponse getProduct(Long product_id){
-        Optional<Product> product = productRepository.findById(product_id);
-        ProductResponse response = new ProductResponse(product.orElseThrow(ProductNotExistException::new));
+    public ProductDetailResponse getProduct(Long productId){
+        Optional<Product> product = productRepository.findById(productId);
+        Optional<Seller> seller = sellerRepository.findByMemberId(product.orElseThrow(ProductNotExistException::new).getMember().getId());
+        ProductDetailResponse response = new ProductDetailResponse(product.orElseThrow(ProductNotExistException::new),seller.orElseThrow(SellerNotFoundException::new));
         return response;
     }
 
@@ -88,9 +87,9 @@ public class ProductService {
         List<ProductResponse> response = new ArrayList<>();
         for(int i = 0 ; i < products.size() ; i++){
             ProductResponse productResponse = new ProductResponse(products.get(i));
-            Long category_id = getCategoryIdByProduct(products.get(i).getId());
-            productResponse.setCategoryId(category_id);
-            productResponse.setCategoryName(categoryRepository.findById(category_id).orElseThrow(CategoryNotExistException::new).getCategoryName());
+            Long categoryId = getCategoryIdByProduct(products.get(i).getId());
+            productResponse.setCategoryId(categoryId);
+            productResponse.setCategoryName(categoryRepository.findById(categoryId).orElseThrow(CategoryNotExistException::new).getCategoryName());
             response.add(productResponse);
         }
         return response;
@@ -102,8 +101,8 @@ public class ProductService {
         List<ProductResponse> response = new ArrayList<>();
 
         for (Object[] row:resultList) {
-            Long product_id = (Long)row[1];
-            Product product = productRepository.findById(product_id).orElseThrow(ProductNotExistException::new);
+            Long productId = (Long)row[1];
+            Product product = productRepository.findById(productId).orElseThrow(ProductNotExistException::new);
             ProductResponse productResponse = new ProductResponse(product);
             Long category_id = getCategoryIdByProduct(product.getId());
             productResponse.setCategoryId(category_id);
@@ -114,41 +113,41 @@ public class ProductService {
     }
 
     public List<ProductResponse> getSearchResultProduct(String keyword) {
-        List<Product> products = productRepository.findProductsByNameContaining(keyword);
+        List<Product> products = productRepository.findAllByNameContaining(keyword);
         List<ProductResponse> response = new ArrayList<>();
         for(Product product: products){
             ProductResponse productResponse = new ProductResponse(product);
-            Long category_id = getCategoryIdByProduct(product.getId());
-            productResponse.setCategoryId(category_id);
-            productResponse.setCategoryName(categoryRepository.findById(category_id).orElseThrow(CategoryNotExistException::new).getCategoryName());
+            Long categoryId = getCategoryIdByProduct(product.getId());
+            productResponse.setCategoryId(categoryId);
+            productResponse.setCategoryName(categoryRepository.findById(categoryId).orElseThrow(CategoryNotExistException::new).getCategoryName());
             response.add(productResponse);
         }
         return response;
     }
 
     @Transactional
-    public void LikeProductAdd(Long member_id, Long product_id) {
-        likeRepository.save(new Like(productRepository.getById(product_id),memberRepository.getById(member_id)));
+    public void likeProductAdd(Long memberId, Long productId) {
+        likeRepository.save(new Like(productRepository.getById(productId),memberRepository.getById(memberId)));
     }
 
-    public List<ProductResponse> getMemberLikeProducts(Long member_id) {
+    public List<ProductResponse> getMemberLikeProducts(Long memberId) {
         List<ProductResponse> response = new ArrayList<>();
 
-        List<Like> likeList = likeRepository.findAllByMember_Id(member_id);
+        List<Like> likeList = likeRepository.findAllByMemberId(memberId);
 
         for (Like entity : likeList) {
             Optional<Product> product = productRepository.findById(entity.getProduct().getId());
             ProductResponse productResponse = new ProductResponse(product.orElseThrow(ProductNotExistException::new));
-            Long category_id = getCategoryIdByProduct(product.orElseThrow(ProductNotExistException::new).getId());
-            productResponse.setCategoryId(category_id);
-            productResponse.setCategoryName(categoryRepository.findById(category_id).orElseThrow(CategoryNotExistException::new).getCategoryName());
+            Long categoryId = getCategoryIdByProduct(product.orElseThrow(ProductNotExistException::new).getId());
+            productResponse.setCategoryId(categoryId);
+            productResponse.setCategoryName(categoryRepository.findById(categoryId).orElseThrow(CategoryNotExistException::new).getCategoryName());
             response.add(productResponse);
         }
         return response;
     }
 
     @Transactional
-    public void LikeProductUndo(Long member_id, Long product_id) {
+    public void likeProductUndo(Long member_id, Long product_id) {
         Like likeEntity = likeRepository.findByMemberIdAndProductId(member_id, product_id).orElseThrow(LikeNotExistException::new);
         likeRepository.deleteById(likeEntity.getId());
     }
@@ -161,8 +160,8 @@ public class ProductService {
         return categoryRepository.findAll();
     }
 
-    public List<ProductResponse> getCategoryProducts(Long category_id){
-        List<CategoryProduct> categoryProductsList = categoryProductRepository.findByCategory_Id(category_id);
+    public List<ProductResponse> getCategoryProducts(Long categoryId){
+        List<CategoryProduct> categoryProductsList = categoryProductRepository.findAllByCategoryId(categoryId);
         List<ProductResponse> response = new ArrayList<>();
 
         //if list is empty
@@ -171,49 +170,44 @@ public class ProductService {
         //if list is not empty
         for(CategoryProduct categoryProduct: categoryProductsList){
             ProductResponse productResponse = new ProductResponse(categoryProduct.getProduct());
-            productResponse.setCategoryId(category_id);
-            productResponse.setCategoryName(categoryRepository.findById(category_id).orElseThrow(CategoryNotExistException::new).getCategoryName());
+            productResponse.setCategoryId(categoryId);
+            productResponse.setCategoryName(categoryRepository.findById(categoryId).orElseThrow(CategoryNotExistException::new).getCategoryName());
             response.add(productResponse);
         }
         return response;
     }
 
     @Transactional
-    public void deleteCategory(Long category_id){
-        categoryRepository.deleteById(category_id);
+    public void deleteCategory(Long categoryId){
+        categoryRepository.deleteById(categoryId);
     }
 
     @Transactional
     public void saveCategory(CategoryRegisterRequest categoryRegisterRequest){
-        Category child_category = categoryRegisterRequest.convert();
+        Category parentCategory = categoryRepository.getOne(categoryRegisterRequest.getCategoryParentId());
+        Category newCategory = Category.builder().categoryName(categoryRegisterRequest.getCategoryName()).parent(parentCategory).build();
+        categoryRepository.save(newCategory);
 
-        Category parent_category = categoryRepository.getOne(categoryRegisterRequest.getCategoryParentId());
-
-        child_category.setCategoryParent(parent_category);
-        categoryRepository.save(child_category);
-
-        parent_category.addCategoryChild(child_category);
-        categoryRepository.save(parent_category);
     }
 
 
-    public List<ProductResponse> getHashtagSearchResult(Long hashtag_id){
-        List<ProductHashtag> productHashtagList = productHashtagRepository.findByHashtag_Id(hashtag_id);
+    public List<ProductResponse> getHashtagSearchResult(Long hashtagId){
+        List<ProductHashtag> productHashtagList = productHashtagRepository.findAllByHashtagId(hashtagId);
         List<ProductResponse> response = new ArrayList<>();
         for(ProductHashtag productHashtag: productHashtagList){
             ProductResponse productResponse = new ProductResponse(productHashtag.getProduct());
-            Long category_id = getCategoryIdByProduct(productHashtag.getProduct().getId());
-            productResponse.setCategoryId(category_id);
-            productResponse.setCategoryName(categoryRepository.findById(category_id).orElseThrow(CategoryNotExistException::new).getCategoryName());
+            Long categoryId = getCategoryIdByProduct(productHashtag.getProduct().getId());
+            productResponse.setCategoryId(categoryId);
+            productResponse.setCategoryName(categoryRepository.findById(categoryId).orElseThrow(CategoryNotExistException::new).getCategoryName());
             response.add(productResponse);
         }
         return response;
     }
 
-    public Long getCategoryIdByProduct(Long product_id){
-        List<CategoryProduct> categoryProductList = categoryProductRepository.findByProduct_Id(product_id);
-        Long category_id = categoryProductList.get(categoryProductList.size()-1).getCategory().getId();
-        return category_id;
+    public Long getCategoryIdByProduct(Long productId){
+        List<CategoryProduct> categoryProductList = categoryProductRepository.findAllByProductId(productId);
+        Long categoryId = categoryProductList.get(categoryProductList.size()-1).getCategory().getId();
+        return categoryId;
     }
 
 

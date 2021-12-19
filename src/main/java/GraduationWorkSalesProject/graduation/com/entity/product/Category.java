@@ -1,9 +1,11 @@
 package GraduationWorkSalesProject.graduation.com.entity.product;
 
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
-import java.util.ArrayList;
 import java.util.List;
 
 @NoArgsConstructor(access= AccessLevel.PROTECTED)
@@ -13,7 +15,7 @@ import java.util.List;
 public class Category {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "product_category_id")
     private Long id;
 
@@ -28,23 +30,25 @@ public class Category {
     @OneToMany(mappedBy = "category",fetch = FetchType.LAZY)
     private List<CategoryProduct> categoryProducts;
 
-    @OneToMany(mappedBy = "parent",fetch = FetchType.LAZY)
-    private List<Category> child = new ArrayList<Category>();
-
-    public void addCategoryChild(Category category){
-        child.add(category);
-        category.setCategoryParent(this);
-    }
-
-    public void setCategoryParent(Category category){
-        this.parent = category;
-        category.addCategoryChild(this);
-    }
-
     @Builder
     public Category(String categoryName, Category parent){
         this.categoryName = categoryName;
         this.parent = parent;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof Category) {
+            Category category = (Category) obj;
+            if (this.id.equals(category.id)) {
+                return true;
+            }
+        }return false;
+    }
+
+    @Override
+    public int hashCode(){
+        return this.hashCode();
     }
 
 
