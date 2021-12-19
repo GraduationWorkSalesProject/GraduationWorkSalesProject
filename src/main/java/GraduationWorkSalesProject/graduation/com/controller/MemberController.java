@@ -5,7 +5,6 @@ import static GraduationWorkSalesProject.graduation.com.dto.result.ResultCode.CH
 import static GraduationWorkSalesProject.graduation.com.dto.result.ResultCode.CHANGE_PROFILE_SUCCESS;
 import static GraduationWorkSalesProject.graduation.com.dto.result.ResultCode.EMAIL_DUPLICATION;
 import static GraduationWorkSalesProject.graduation.com.dto.result.ResultCode.EMAIL_VALID;
-import static GraduationWorkSalesProject.graduation.com.dto.result.ResultCode.FIND_PROFILE_SUCCESS;
 import static GraduationWorkSalesProject.graduation.com.dto.result.ResultCode.FIND_USERID_SUCCESS;
 import static GraduationWorkSalesProject.graduation.com.dto.result.ResultCode.JOIN_SUCCESS;
 import static GraduationWorkSalesProject.graduation.com.dto.result.ResultCode.LEAVE_SUCCESS;
@@ -26,7 +25,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -224,22 +222,6 @@ public class MemberController {
     	final MemeberProfileResponse response = memberService.changeProfile(request, userDetails.getUsername());
 
         return ResponseEntity.ok(ResultResponse.of(CHANGE_PROFILE_SUCCESS, response));
-    }
-
-    @ApiOperation(value = "회원 정보 조회")
-    @GetMapping(value = "/members/profile")
-    public ResponseEntity<ResultResponse> getProfile() {
-    	final Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-    	final UserDetails userDetails = (UserDetails) principal;
-    	/**
-    	 * findOneByUsername에서 Member가 넘어와 Memeber에 toMemeberProfileResponse 메소드를 만듬
-    	 * 방안 1) controller에서 builder 생성
-    	 * 방안 2) findOneByUsername 말고 따로 service 만들기
-    	 * 이 부분 리뷰 주시면 감사하겠습니다.
-    	 */
-    	final MemeberProfileResponse response = memberService.findOneByUsername(userDetails.getUsername()).get().toMemeberProfileResponse();
-
-        return ResponseEntity.ok(ResultResponse.of(FIND_PROFILE_SUCCESS, response));
     }
 
 
