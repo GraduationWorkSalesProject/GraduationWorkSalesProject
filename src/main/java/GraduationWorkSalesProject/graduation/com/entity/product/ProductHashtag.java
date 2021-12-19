@@ -10,7 +10,7 @@ import javax.persistence.*;
 @Entity
 @Getter
 @NoArgsConstructor(access= AccessLevel.PROTECTED)
-@Table(name = "product_hashtags")
+@Table(name = "product_hashtag")
 public class ProductHashtag{
 
     @Id
@@ -18,11 +18,11 @@ public class ProductHashtag{
     @Column(name = "product_hashtag_id")
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "product_id")
     private Product product;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "hashtag_id")
     private Hashtag hashtag;
 

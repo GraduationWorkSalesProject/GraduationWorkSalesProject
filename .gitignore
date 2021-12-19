@@ -7,7 +7,7 @@ settings.gradle
 docker-compose.yml
 system.properties
 Dockerfile
-build/
+
 src/main/resources/application.yml
 src/main/resources-dev/application-dev.yml
 src/main/resources-test/application-test.yml
@@ -15,8 +15,7 @@ src/main/resources-prod/application-prod.yml
 !gradle/wrapper/gradle-wrapper.jar
 !**/src/main/**/build/
 !**/src/test/**/build/
-src/main/resources/gradu-884f1-firebase-adminsdk-lpnwj-0785611e75.json
-
+*.class
 ### STS ###
 .apt_generated
 .classpath
