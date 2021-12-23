@@ -8,7 +8,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotBlank;
 
 @ApiModel(value = "해시태그 등록 모델")
 @Getter
@@ -17,7 +17,7 @@ import javax.validation.constraints.NotEmpty;
 public class HashtagRegisterRequest {
 
     @ApiModelProperty(value = "해시태그명", example = "해시태그1", required = true)
-    @NotEmpty(message="해시태그명은 필수입니다다")
+    @NotBlank(message="해시태그명은 필수입니다다")
    private String hashtagName;
 
     public Hashtag covert(){

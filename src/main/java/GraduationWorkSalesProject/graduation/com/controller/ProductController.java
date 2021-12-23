@@ -1,24 +1,27 @@
 package GraduationWorkSalesProject.graduation.com.controller;
 
-import GraduationWorkSalesProject.graduation.com.config.firebase.FirebaseFileService;
 import GraduationWorkSalesProject.graduation.com.dto.product.*;
 import GraduationWorkSalesProject.graduation.com.dto.result.ResultCode;
 import GraduationWorkSalesProject.graduation.com.dto.result.ResultResponse;
 import GraduationWorkSalesProject.graduation.com.entity.member.Member;
 import GraduationWorkSalesProject.graduation.com.entity.product.Category;
 import GraduationWorkSalesProject.graduation.com.exception.InvalidCertificateException;
-import GraduationWorkSalesProject.graduation.com.repository.CategoryRepository;
 import GraduationWorkSalesProject.graduation.com.service.MemberService;
 import GraduationWorkSalesProject.graduation.com.service.ProductService;
+import GraduationWorkSalesProject.graduation.com.service.file.FileUploadService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.validator.constraints.Range;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,49 +29,40 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
 
 @Api(tags = "상품 API")
+@Validated
 @RestController
 @RequiredArgsConstructor
 public class ProductController {
 
     private final MemberService memberService;
     private final ProductService productService;
-    private final CategoryRepository categoryRepository;
-    private final FirebaseFileService firebaseFileService;
+    private final FileUploadService uploadService;
 
     //ok
     @ApiOperation(value = "상품 등록하기")
     @PostMapping(value = "/products", consumes = MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ResultResponse> register(
-            @RequestParam("productRepImage") MultipartFile productRepImage,
+            @RequestParam(value = "productRepImage", required = false) @NotNull(message = "상품 사진은 적어도 한 개 이상 존재해야 합니다") MultipartFile productRepImage,
             @RequestParam(value = "productImage1", required = false) MultipartFile productImage1,
             @RequestParam(value = "productImage2", required = false) MultipartFile productImage2,
             @RequestParam(value = "productImage3", required = false) MultipartFile productImage3,
             @RequestParam(value = "productImage4", required = false) MultipartFile productImage4,
-            @RequestParam("productName") String productName,
-            @RequestParam("productPrice") int productPrice,
-            @RequestParam("productInformation") String productInformation,
-            @RequestParam("categoryId") Long categoryId,
-            @RequestParam("hashtags") List<String> hashtags,
-            @RequestParam("productDeliveryTerm") int productDeliveryTerm,
-            @RequestParam("productDeliveryPrice") int productDeliveryPrice
+            @RequestParam(value = "productName", required = false) @NotBlank(message = "상품명은 필수입니다") String productName,
+            @RequestParam(value = "productPrice", required = false) @Range(min = 1, message = "상품 가격은 1 이상이어야 합니다") int productPrice,
+            @RequestParam(value = "productInformation", required = false) @NotBlank(message = "상품 정보는 필수입니다") String productInformation,
+            @RequestParam(value = "categoryId", required = false) @Range(min = 1, message = "카테고리 번호는 유효한 값이어야 합니다") Long categoryId,
+            @RequestParam(value = "hashtags", required = false) List<String> hashtags,
+            @RequestParam(value = "productDeliveryTerm", required = false, defaultValue = "0") @Range(min = 0, message = "유효하지 않은 배송기간입니다") int productDeliveryTerm,
+            @RequestParam(value = "productDeliveryPrice", required = false, defaultValue = "0") @Range(min = 0, message = "유효하지 않은 배송비입니다") int productDeliveryPrice
     ) {
-
         final String username = SecurityContextHolder.getContext().getAuthentication().getName();
         final Member findMember = memberService.findOneByUsername(username).orElseThrow(InvalidCertificateException::new);
 
         ProductRegisterRequest productRegisterRequest = new ProductRegisterRequest(findMember, productName,
                 productPrice, productInformation, categoryId, hashtags,
-                productDeliveryTerm, productDeliveryPrice,
-                productRepImage,productImage1,productImage2,productImage3,productImage4);
-
-        productService.saveProduct(productRegisterRequest);
-
+                productDeliveryTerm, productDeliveryPrice, productRepImage, productImage1, productImage2, productImage3, productImage4);
         try {
-            firebaseFileService.saveTest(productRepImage);
-            if (!productImage1.isEmpty()) firebaseFileService.saveTest(productImage1);
-            if (!productImage2.isEmpty()) firebaseFileService.saveTest(productImage2);
-            if (!productImage3.isEmpty()) firebaseFileService.saveTest(productImage3);
-            if (!productImage4.isEmpty()) firebaseFileService.saveTest(productImage4);
+            productService.saveProduct(productRegisterRequest);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -141,9 +135,10 @@ public class ProductController {
         return ResponseEntity.ok(ResultResponse.of(ResultCode.SEARCH_PRODUCTS_GET_SUCCESS, response));
     }
 
+    //ok
     @ApiOperation(value = "카테고리 등록")
     @PostMapping(value = "/categoriesRegister", consumes = APPLICATION_JSON_VALUE)
-    public ResponseEntity<ResultResponse> registerCategory(@RequestBody CategoryRegisterRequest categoryRegisterRequest) {
+    public ResponseEntity<ResultResponse> registerCategory(@Validated @RequestBody CategoryRegisterRequest categoryRegisterRequest) {
         productService.saveCategory(categoryRegisterRequest);
         return ResponseEntity.ok(ResultResponse.of(ResultCode.CATEGORY_REGISTER_SUCCESS, null));
     }

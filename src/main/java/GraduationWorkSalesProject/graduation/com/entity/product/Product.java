@@ -41,7 +41,7 @@ public class Product {
     @Column(length = 1000, name = "product_information")
     private String information;
 
-    @OneToMany(mappedBy = "product", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "product")
     private List<ProductHashtag> productHashtags;
 
     @Column(name = "product_register_date")

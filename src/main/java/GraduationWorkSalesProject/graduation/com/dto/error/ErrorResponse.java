@@ -4,8 +4,11 @@ import lombok.Getter;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
+import javax.validation.ConstraintViolation;
+import javax.validation.ConstraintViolationException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Getter
@@ -45,6 +48,23 @@ public class ErrorResponse {
     public static ErrorResponse of(MethodArgumentTypeMismatchException e) {
         final String value = e.getValue() == null ? "" : e.getValue().toString();
         final List<ErrorResponse.FieldError> errors = ErrorResponse.FieldError.of(e.getName(), value, e.getErrorCode());
+        return new ErrorResponse(ErrorCode.INVALID_TYPE_VALUE, errors);
+    }
+
+    public static ErrorResponse of(ConstraintViolationException e) {
+        final List<ErrorResponse.FieldError> errors = new ArrayList<ErrorResponse.FieldError>();
+        Set<ConstraintViolation<?>> constraintViolations = e.getConstraintViolations();
+        if (constraintViolations != null) {
+            for (ConstraintViolation c : constraintViolations) {
+                final String pathStr = c.getPropertyPath().toString();
+                final String[] paths = pathStr.split("\\.");
+                final String path = paths.length > 0 ? paths[paths.length - 1] : paths[0];
+                final String fieldName = path;
+                final String requestedValue = c.getInvalidValue() == null ? "" : c.getInvalidValue().toString();
+                final String message = c.getMessage();
+                errors.add(new FieldError(fieldName, requestedValue, message));
+            }
+        }
         return new ErrorResponse(ErrorCode.INVALID_TYPE_VALUE, errors);
     }
 

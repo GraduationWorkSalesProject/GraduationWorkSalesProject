@@ -2,6 +2,7 @@ package GraduationWorkSalesProject.graduation.com.entity.product;
 
 import GraduationWorkSalesProject.graduation.com.vo.Image;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -31,5 +32,10 @@ public class ProductImage {
     @JoinColumn(name = "product_id")
     private Product product;
 
+    @Builder
+    public ProductImage(Product product, Image image){
+        this.product = product;
+        this.image = image;
+    }
 
 }

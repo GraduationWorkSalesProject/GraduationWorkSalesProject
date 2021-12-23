@@ -12,6 +12,8 @@ import java.util.List;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class RecentViewRequest {
+
     @ApiModelProperty(value = "최근 본 상품 리스트")
     List<Long> productId;
+
 }

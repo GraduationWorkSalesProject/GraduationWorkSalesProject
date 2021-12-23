@@ -1,7 +1,12 @@
-package GraduationWorkSalesProject.graduation.com.config.firebase;
+package GraduationWorkSalesProject.graduation.com.service.file.firebase;
 
+import GraduationWorkSalesProject.graduation.com.service.file.FileUploadService;
+import GraduationWorkSalesProject.graduation.com.vo.Image;
 import com.google.auth.oauth2.GoogleCredentials;
-import com.google.cloud.storage.*;
+import com.google.cloud.storage.BlobId;
+import com.google.cloud.storage.BlobInfo;
+import com.google.cloud.storage.Storage;
+import com.google.cloud.storage.StorageOptions;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.core.io.ClassPathResource;
@@ -10,13 +15,12 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
 @Service
-public class FirebaseFileService {
+public class FirebaseFileService implements FileUploadService {
 
     private Storage storage;
 
@@ -32,7 +36,7 @@ public class FirebaseFileService {
         }
     }
 
-    public String saveTest(MultipartFile file) throws IOException{
+    public Image saveTest(MultipartFile file) throws IOException {
         String imageName = generateFileName(file.getOriginalFilename());
         Map<String, String> map = new HashMap<>();
         map.put("firebaseStorageDownloadTokens", imageName);
@@ -41,9 +45,9 @@ public class FirebaseFileService {
                 .setMetadata(map)
                 .setContentType(file.getContentType())
                 .build();
-        System.out.println(blobInfo);
         storage.create(blobInfo, file.getInputStream());
-        return imageName;
+        return new Image(file.getOriginalFilename(), imageName, file.getContentType(),
+                "https://firebasestorage.googleapis.com/v0/b/gradu-884f1.appspot.com/o/" + imageName + "?alt=media&token=" + imageName);
     }
 
     private String generateFileName(String originalFileName) {
@@ -54,12 +58,5 @@ public class FirebaseFileService {
         return StringUtils.getFilenameExtension(originalFileName);
     }
 
-    public String downloadTest(String fileName) throws IOException {
-        String destFileName = UUID.randomUUID().toString().concat(this.getExtension(fileName));     // to set random strinh for destination file name
-        String destFilePath = "C:\\graduImage\\" + destFileName;                                    // to set destination file path
-        Blob blob = storage.get(BlobId.of("gradu-884f1.appspot.com", fileName));
-        blob.downloadTo(Paths.get(destFilePath));
-        return fileName;
-    }
 
 }
