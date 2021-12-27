@@ -50,11 +50,11 @@ public class FirebaseFileService implements FileUploadService {
                 "https://firebasestorage.googleapis.com/v0/b/gradu-884f1.appspot.com/o/" + imageName + "?alt=media&token=" + imageName);
     }
 
-    private String generateFileName(String originalFileName) {
+    public String generateFileName(String originalFileName) {
         return UUID.randomUUID().toString() + "." + getExtension(originalFileName);
     }
 
-    private String getExtension(String originalFileName) {
+    public String getExtension(String originalFileName) {
         return StringUtils.getFilenameExtension(originalFileName);
     }
 
