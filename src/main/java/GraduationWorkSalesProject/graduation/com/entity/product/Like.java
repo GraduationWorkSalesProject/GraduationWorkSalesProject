@@ -20,7 +20,7 @@ public class Like {
     @JoinColumn(name = "product_id")
     private Product product;
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
     private Member member;
 
