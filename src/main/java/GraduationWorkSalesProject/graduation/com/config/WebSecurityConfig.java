@@ -1,5 +1,7 @@
 package GraduationWorkSalesProject.graduation.com.config;
 
+import GraduationWorkSalesProject.graduation.com.config.jwt.JwtAuthenticationEntryPoint;
+import GraduationWorkSalesProject.graduation.com.config.jwt.JwtRequestFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -65,7 +67,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .authorizeRequests()
                 .requestMatchers(CorsUtils::isPreFlightRequest).permitAll()
                 .antMatchers("/", "/login", "/join", "/overlap/**", "/verification/**",
-                        "/swagger-resources/**", "/swagger-ui/**", "/help/**", "/reissue").permitAll()
+                        "/swagger-resources/**", "/swagger-ui/**", "/help/**", "/reissue", "/products/lists/recent",
+                        "/products/**","/categories/**","/hashtags/**","/categoriesRegister/**","/hashtagsRegister/**").permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .exceptionHandling().authenticationEntryPoint(jwtAuthenticationEntryPoint)
