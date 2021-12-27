@@ -1,20 +1,28 @@
 package GraduationWorkSalesProject.graduation.com.service;
 
-import GraduationWorkSalesProject.graduation.com.config.jwt.JwtTokenUtil;
-import GraduationWorkSalesProject.graduation.com.dto.member.LoginResponse;
-import GraduationWorkSalesProject.graduation.com.dto.member.MemberJoinRequest;
-import GraduationWorkSalesProject.graduation.com.dto.member.MemberLoginRequest;
-import GraduationWorkSalesProject.graduation.com.entity.member.Member;
-import GraduationWorkSalesProject.graduation.com.exception.*;
-import GraduationWorkSalesProject.graduation.com.repository.MemberRepository;
-import lombok.RequiredArgsConstructor;
+import java.util.Optional;
+
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Optional;
+import GraduationWorkSalesProject.graduation.com.config.jwt.JwtTokenUtil;
+import GraduationWorkSalesProject.graduation.com.dto.member.LoginResponse;
+import GraduationWorkSalesProject.graduation.com.dto.member.MemberJoinRequest;
+import GraduationWorkSalesProject.graduation.com.dto.member.MemberLoginRequest;
+import GraduationWorkSalesProject.graduation.com.dto.member.MemeberProfileEditRequest;
+import GraduationWorkSalesProject.graduation.com.dto.member.MemeberProfileResponse;
+import GraduationWorkSalesProject.graduation.com.entity.member.Member;
+import GraduationWorkSalesProject.graduation.com.exception.JoinInvalidInputException;
+import GraduationWorkSalesProject.graduation.com.exception.LoginInvalidInputException;
+import GraduationWorkSalesProject.graduation.com.exception.PasswordNotMatchException;
+import GraduationWorkSalesProject.graduation.com.exception.RefreshTokenNotMatchException;
+import GraduationWorkSalesProject.graduation.com.exception.UseridNotFoundException;
+import GraduationWorkSalesProject.graduation.com.exception.UsernameNotFoundException;
+import GraduationWorkSalesProject.graduation.com.repository.MemberRepository;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -34,6 +42,8 @@ public class MemberService {
         member.encryptPassword(bCryptPasswordEncoder.encode(member.getPassword()));
         memberRepository.save(member);
     }
+
+
 
     private void checkJoinInputsWereVerified(MemberJoinRequest memberJoinRequest) {
         memberRepository.findByUserid(memberJoinRequest.getUserid()).ifPresent(member -> {
@@ -66,7 +76,7 @@ public class MemberService {
                 .username(findMember.getUsername())
                 .email(findMember.getEmail())
                 .phoneNumber(findMember.getPhoneNumber())
-                .imageUrl(findMember.getImage().getImageHref())
+                .imageUrl("test")//findMember.getImage().getImageHref()
                 .joinedDate(findMember.getJoinedDate())
                 .role(findMember.getRole())
                 .certificationStatus(findMember.getCertificationStatus())
@@ -128,4 +138,24 @@ public class MemberService {
         jwtTokenUtil.validateRefreshToken(refreshToken);
         checkRefreshToken(refreshToken);
     }
+
+
+    /**
+     * 회원 정보(전화번호, 주소, 상세주소, 우편번호) 수정하기
+     *
+     * @param request
+     * @param userName
+     * @return 수정된 회원 정보
+     */
+    @Transactional
+	public MemeberProfileResponse changeProfile(MemeberProfileEditRequest request, String userName) {
+    	Member member = memberRepository.findByUsername(userName).orElseThrow(UsernameNotFoundException::new);
+    	member.updateProfile(request.getPhoneNumber(), request.getAddress(), request.getDetailAddress(), request.getPostcode());
+    	return MemeberProfileResponse.builder()
+    									 .phoneNumber(member.getPhoneNumber())
+    									 .address(member.getAddress().getAddress())
+    									 .detailAddress(member.getAddress().getDetailAddress())
+    									 .postcode(member.getAddress().getPostcode())
+    									 .build();
+	}
 }

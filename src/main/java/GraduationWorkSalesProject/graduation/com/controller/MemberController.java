@@ -1,33 +1,65 @@
 package GraduationWorkSalesProject.graduation.com.controller;
 
-import GraduationWorkSalesProject.graduation.com.dto.member.MemberJwtTokenRequest;
-import GraduationWorkSalesProject.graduation.com.dto.certification.CertificateResponse;
-import GraduationWorkSalesProject.graduation.com.dto.certification.CertificationCodeResponse;
-import GraduationWorkSalesProject.graduation.com.exception.*;
-import GraduationWorkSalesProject.graduation.com.entity.certify.Certificate;
-import GraduationWorkSalesProject.graduation.com.entity.certify.Certification;
-
-import GraduationWorkSalesProject.graduation.com.dto.member.*;
-import GraduationWorkSalesProject.graduation.com.dto.result.ResultCode;
-import GraduationWorkSalesProject.graduation.com.dto.result.ResultResponse;
-import GraduationWorkSalesProject.graduation.com.entity.member.Member;
-import GraduationWorkSalesProject.graduation.com.service.*;
-import GraduationWorkSalesProject.graduation.com.service.certificate.CertificateService;
-import GraduationWorkSalesProject.graduation.com.service.certification.CertificationService;
-import GraduationWorkSalesProject.graduation.com.service.mail.MailServiceGmailSMTP;
-import io.swagger.annotations.*;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
+import static GraduationWorkSalesProject.graduation.com.dto.result.ResultCode.CERTIFY_EMAIL_SUCCESS;
+import static GraduationWorkSalesProject.graduation.com.dto.result.ResultCode.CHANGE_PASSWORD_SUCCESS;
+import static GraduationWorkSalesProject.graduation.com.dto.result.ResultCode.CHANGE_PROFILE_SUCCESS;
+import static GraduationWorkSalesProject.graduation.com.dto.result.ResultCode.EMAIL_DUPLICATION;
+import static GraduationWorkSalesProject.graduation.com.dto.result.ResultCode.EMAIL_VALID;
+import static GraduationWorkSalesProject.graduation.com.dto.result.ResultCode.FIND_USERID_SUCCESS;
+import static GraduationWorkSalesProject.graduation.com.dto.result.ResultCode.JOIN_SUCCESS;
+import static GraduationWorkSalesProject.graduation.com.dto.result.ResultCode.LEAVE_SUCCESS;
+import static GraduationWorkSalesProject.graduation.com.dto.result.ResultCode.LOGIN_SUCCESS;
+import static GraduationWorkSalesProject.graduation.com.dto.result.ResultCode.REISSUE_SUCCESS;
+import static GraduationWorkSalesProject.graduation.com.dto.result.ResultCode.SEND_MAIL_SUCCESS;
+import static GraduationWorkSalesProject.graduation.com.dto.result.ResultCode.USERID_DUPLICATION;
+import static GraduationWorkSalesProject.graduation.com.dto.result.ResultCode.USERID_VALID;
+import static GraduationWorkSalesProject.graduation.com.dto.result.ResultCode.USERNAME_DUPLICATION;
+import static GraduationWorkSalesProject.graduation.com.dto.result.ResultCode.USERNAME_VALID;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 
-import static GraduationWorkSalesProject.graduation.com.dto.result.ResultCode.*;
-import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
+
+import GraduationWorkSalesProject.graduation.com.dto.certification.CertificateResponse;
+import GraduationWorkSalesProject.graduation.com.dto.certification.CertificationCodeResponse;
+import GraduationWorkSalesProject.graduation.com.dto.member.LoginResponse;
+import GraduationWorkSalesProject.graduation.com.dto.member.MemberCertificationCodeRequest;
+import GraduationWorkSalesProject.graduation.com.dto.member.MemberEmailCertificationRequest;
+import GraduationWorkSalesProject.graduation.com.dto.member.MemberEmailCheckRequest;
+import GraduationWorkSalesProject.graduation.com.dto.member.MemberFindUseridResponse;
+import GraduationWorkSalesProject.graduation.com.dto.member.MemberHelpFindPasswordRequest;
+import GraduationWorkSalesProject.graduation.com.dto.member.MemberHelpFindUseridRequest;
+import GraduationWorkSalesProject.graduation.com.dto.member.MemberJoinRequest;
+import GraduationWorkSalesProject.graduation.com.dto.member.MemberJwtTokenRequest;
+import GraduationWorkSalesProject.graduation.com.dto.member.MemberLoginRequest;
+import GraduationWorkSalesProject.graduation.com.dto.member.MemberUseridCheckRequest;
+import GraduationWorkSalesProject.graduation.com.dto.member.MemberUsernameCheckRequest;
+import GraduationWorkSalesProject.graduation.com.dto.member.MemeberProfileEditRequest;
+import GraduationWorkSalesProject.graduation.com.dto.member.MemeberProfileResponse;
+import GraduationWorkSalesProject.graduation.com.dto.result.ResultCode;
+import GraduationWorkSalesProject.graduation.com.dto.result.ResultResponse;
+import GraduationWorkSalesProject.graduation.com.entity.certify.Certificate;
+import GraduationWorkSalesProject.graduation.com.entity.certify.Certification;
+import GraduationWorkSalesProject.graduation.com.entity.member.Member;
+import GraduationWorkSalesProject.graduation.com.exception.EmailNotFoundException;
+import GraduationWorkSalesProject.graduation.com.service.MemberService;
+import GraduationWorkSalesProject.graduation.com.service.certificate.CertificateService;
+import GraduationWorkSalesProject.graduation.com.service.certification.CertificationService;
+import GraduationWorkSalesProject.graduation.com.service.mail.MailServiceGmailSMTP;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiOperation;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 // TODO:
 //  1. Redis -> heroku or aws에서 연동하는 방법 찾기
@@ -178,4 +210,20 @@ public class MemberController {
 
         return ResponseEntity.ok(ResultResponse.of(CHANGE_PASSWORD_SUCCESS, null));
     }
+
+
+
+    @ApiOperation(value = "회원 정보 수정")
+    @PostMapping(value = "/members/profile", consumes = APPLICATION_JSON_VALUE)
+    public ResponseEntity<ResultResponse> editProfile(@Validated @RequestBody MemeberProfileEditRequest request) {
+    	final Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    	final UserDetails userDetails = (UserDetails) principal;
+
+    	final MemeberProfileResponse response = memberService.changeProfile(request, userDetails.getUsername());
+
+        return ResponseEntity.ok(ResultResponse.of(CHANGE_PROFILE_SUCCESS, response));
+    }
+
+
+
 }

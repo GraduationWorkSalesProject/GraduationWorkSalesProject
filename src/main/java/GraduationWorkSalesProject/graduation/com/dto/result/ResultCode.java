@@ -25,6 +25,7 @@ public enum ResultCode {
     CHANGE_PASSWORD_SUCCESS(200, "M111", "회원 비밀번호 변경 성공"),
     CERTIFY_EMAIL_SUCCESS(200, "M112", "회원 이메일 인증 성공"),
 
+
     // Product
     PRODUCT_REGISTER_SUCCESS(200, "P100" ,"상품이 성공적으로 등록되었습니다."),
     PRODUCT_GET_SUCCESS(200, "P101" ,"상품을 성공적으로 불러왔습니다."),
@@ -40,9 +41,12 @@ public enum ResultCode {
     PRODUCT_LIKE_UNDO_SUCCESS(200,"P111","상품 좋아요가 성공적으로 취소되었습니다."),
     PRODUCT_LIKE_NUM_SUCCESS(200,"P112","상품 좋아요 숫자 불러오기 성공"),
     PRODUCT_DELETE_SUCCESS(200,"P113","상품 삭제 성공"),
-    CATEGORY_DELETE_SUCCESS(200,"p114","카테고리 삭제 성공")
-    ,
+    CATEGORY_DELETE_SUCCESS(200,"p114","카테고리 삭제 성공"),
 
+
+
+    CHANGE_PROFILE_SUCCESS(200, "M113", "회원 정보 변경 성공"),
+    FIND_PROFILE_SUCCESS(200, "M114", "회원 정보 조회 성공"),
 
 
 	//Seller
