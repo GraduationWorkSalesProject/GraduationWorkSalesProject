@@ -24,7 +24,8 @@ public enum ResultCode {
     FIND_USERID_SUCCESS(200, "M110", "회원 아이디 찾기 성공"),
     CHANGE_PASSWORD_SUCCESS(200, "M111", "회원 비밀번호 변경 성공"),
     CERTIFY_EMAIL_SUCCESS(200, "M112", "회원 이메일 인증 성공"),
-
+    CERTIFY_STUDENT_ENROLL_SUCCESS(200, "M113", "회원 학생 인증 등록 성공"),
+    CERTIFY_STUDENT_SUCCESS(200, "M114", "회원 학생 인증 성공"),
 
     // Product
     PRODUCT_REGISTER_SUCCESS(200, "P100" ,"상품이 성공적으로 등록되었습니다."),
@@ -50,9 +51,9 @@ public enum ResultCode {
 
 
 	//Seller
-	SELLER_REGISTER_SUCCESS(200, "S100", "판매자 등록에 성공 행습니다."),
-	CHANGE_SELLER_INFORMATION_SUCCESS(200, "S100", "판매자 정보 변경에 성공 했습니다."),
-	FIND_SELLER_INFORMATION_SUCCESS(200, "S100", "판매자 정보 조회에 성공 했습니다.")
+	SELLER_REGISTER_SUCCESS(200, "S100", "판매자 등록에 성공했습니다."),
+	CHANGE_SELLER_INFORMATION_SUCCESS(200, "S100", "판매자 정보 변경에 성공했습니다."),
+	FIND_SELLER_INFORMATION_SUCCESS(200, "S100", "판매자 정보 조회에 성공했습니다.")
 	;
 
     private int status;

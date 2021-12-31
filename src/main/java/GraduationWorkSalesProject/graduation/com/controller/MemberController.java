@@ -1,6 +1,7 @@
 package GraduationWorkSalesProject.graduation.com.controller;
 
 import static GraduationWorkSalesProject.graduation.com.dto.result.ResultCode.CERTIFY_EMAIL_SUCCESS;
+import static GraduationWorkSalesProject.graduation.com.dto.result.ResultCode.CERTIFY_STUDENT_ENROLL_SUCCESS;
 import static GraduationWorkSalesProject.graduation.com.dto.result.ResultCode.CHANGE_PASSWORD_SUCCESS;
 import static GraduationWorkSalesProject.graduation.com.dto.result.ResultCode.CHANGE_PROFILE_SUCCESS;
 import static GraduationWorkSalesProject.graduation.com.dto.result.ResultCode.EMAIL_DUPLICATION;
@@ -16,7 +17,9 @@ import static GraduationWorkSalesProject.graduation.com.dto.result.ResultCode.US
 import static GraduationWorkSalesProject.graduation.com.dto.result.ResultCode.USERNAME_DUPLICATION;
 import static GraduationWorkSalesProject.graduation.com.dto.result.ResultCode.USERNAME_VALID;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
 
+import java.io.IOException;
 import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 
@@ -27,7 +30,9 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import GraduationWorkSalesProject.graduation.com.dto.certification.CertificateResponse;
 import GraduationWorkSalesProject.graduation.com.dto.certification.CertificationCodeResponse;
@@ -41,16 +46,20 @@ import GraduationWorkSalesProject.graduation.com.dto.member.MemberHelpFindUserid
 import GraduationWorkSalesProject.graduation.com.dto.member.MemberJoinRequest;
 import GraduationWorkSalesProject.graduation.com.dto.member.MemberJwtTokenRequest;
 import GraduationWorkSalesProject.graduation.com.dto.member.MemberLoginRequest;
+import GraduationWorkSalesProject.graduation.com.dto.member.MemberStudentCertificationRequest;
 import GraduationWorkSalesProject.graduation.com.dto.member.MemberUseridCheckRequest;
 import GraduationWorkSalesProject.graduation.com.dto.member.MemberUsernameCheckRequest;
 import GraduationWorkSalesProject.graduation.com.dto.member.MemeberProfileEditRequest;
 import GraduationWorkSalesProject.graduation.com.dto.member.MemeberProfileResponse;
 import GraduationWorkSalesProject.graduation.com.dto.result.ResultCode;
 import GraduationWorkSalesProject.graduation.com.dto.result.ResultResponse;
+import GraduationWorkSalesProject.graduation.com.dto.seller.SellerRegisterRequest;
 import GraduationWorkSalesProject.graduation.com.entity.certify.Certificate;
 import GraduationWorkSalesProject.graduation.com.entity.certify.Certification;
 import GraduationWorkSalesProject.graduation.com.entity.member.Member;
 import GraduationWorkSalesProject.graduation.com.exception.EmailNotFoundException;
+import GraduationWorkSalesProject.graduation.com.exception.InvalidCertificateException;
+import GraduationWorkSalesProject.graduation.com.service.MemberCertificationsService;
 import GraduationWorkSalesProject.graduation.com.service.MemberService;
 import GraduationWorkSalesProject.graduation.com.service.certificate.CertificateService;
 import GraduationWorkSalesProject.graduation.com.service.certification.CertificationService;
@@ -61,9 +70,6 @@ import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-// TODO:
-//  1. Redis -> heroku or aws에서 연동하는 방법 찾기
-
 @Api(tags = "회원 API")
 @Slf4j
 @RestController
@@ -71,6 +77,7 @@ import lombok.extern.slf4j.Slf4j;
 public class MemberController {
 
     private final MemberService memberService;
+    private final MemberCertificationsService memberCertificationsService;
     private final MailServiceGmailSMTP mailService;
     private final CertificationService certificationService;
     private final CertificateService certificateService;
@@ -222,6 +229,25 @@ public class MemberController {
     	final MemeberProfileResponse response = memberService.changeProfile(request, userDetails.getUsername());
 
         return ResponseEntity.ok(ResultResponse.of(CHANGE_PROFILE_SUCCESS, response));
+    }
+
+
+    @ApiOperation(value = "회원 대학생 인증")
+    @PostMapping(value = "/student/certification", consumes = MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ResultResponse> certifyStudent(
+    		 @RequestParam(value = "image", required = true) MultipartFile image,
+    		 @RequestParam(value = "school", required = true)String school,
+    		 @RequestParam(value = "department", required = true)String department,
+    		 @Validated SellerRegisterRequest sellerRegisterRequest) throws IOException {
+    	final String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        final Member findMember = memberService.findOneByUsername(username).orElseThrow(InvalidCertificateException::new);
+
+
+    	log.info(school);
+    	log.info(department);
+    	MemberStudentCertificationRequest request = new MemberStudentCertificationRequest(school, department, image);
+    	memberCertificationsService.save(request, findMember);
+    	return ResponseEntity.ok(ResultResponse.of(CERTIFY_STUDENT_ENROLL_SUCCESS, null));
     }
 
 
