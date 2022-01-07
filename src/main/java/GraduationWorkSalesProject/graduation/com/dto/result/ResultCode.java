@@ -26,6 +26,7 @@ public enum ResultCode {
     CERTIFY_EMAIL_SUCCESS(200, "M112", "회원 이메일 인증 성공"),
     CERTIFY_STUDENT_ENROLL_SUCCESS(200, "M113", "회원 학생 인증 등록 성공"),
     CERTIFY_STUDENT_SUCCESS(200, "M114", "회원 학생 인증 성공"),
+    CERTIFY_STUDENT_REJECT(200, "M115", "회원 학생 인증 거절"),
 
     // Product
     PRODUCT_REGISTER_SUCCESS(200, "P100" ,"상품이 성공적으로 등록되었습니다."),

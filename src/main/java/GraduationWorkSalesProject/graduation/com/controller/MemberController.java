@@ -2,6 +2,8 @@ package GraduationWorkSalesProject.graduation.com.controller;
 
 import static GraduationWorkSalesProject.graduation.com.dto.result.ResultCode.CERTIFY_EMAIL_SUCCESS;
 import static GraduationWorkSalesProject.graduation.com.dto.result.ResultCode.CERTIFY_STUDENT_ENROLL_SUCCESS;
+import static GraduationWorkSalesProject.graduation.com.dto.result.ResultCode.CERTIFY_STUDENT_REJECT;
+import static GraduationWorkSalesProject.graduation.com.dto.result.ResultCode.CERTIFY_STUDENT_SUCCESS;
 import static GraduationWorkSalesProject.graduation.com.dto.result.ResultCode.CHANGE_PASSWORD_SUCCESS;
 import static GraduationWorkSalesProject.graduation.com.dto.result.ResultCode.CHANGE_PROFILE_SUCCESS;
 import static GraduationWorkSalesProject.graduation.com.dto.result.ResultCode.EMAIL_DUPLICATION;
@@ -22,6 +24,8 @@ import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
 import java.io.IOException;
 import java.time.format.DateTimeFormatter;
 import java.util.Optional;
+
+import javax.validation.constraints.NotNull;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -232,24 +236,41 @@ public class MemberController {
     }
 
 
-    @ApiOperation(value = "회원 대학생 인증")
+    @ApiOperation(value = "회원 대학생 인증 등록")
     @PostMapping(value = "/student/certification", consumes = MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<ResultResponse> certifyStudent(
-    		 @RequestParam(value = "image", required = true) MultipartFile image,
-    		 @RequestParam(value = "school", required = true)String school,
-    		 @RequestParam(value = "department", required = true)String department,
-    		 @Validated SellerRegisterRequest sellerRegisterRequest) throws IOException {
+    public ResponseEntity<ResultResponse> registerStudentCertification(
+    			@RequestParam(value = "학생증",required = true) @NotNull(message = "학생증 사진을 첨부해 주세요.") MultipartFile image,
+    			@Validated MemberStudentCertificationRequest memberStudentCertificationRequest,
+    			@Validated SellerRegisterRequest sellerRegisterRequest) throws IOException {
     	final String username = SecurityContextHolder.getContext().getAuthentication().getName();
         final Member findMember = memberService.findOneByUsername(username).orElseThrow(InvalidCertificateException::new);
 
 
-    	log.info(school);
-    	log.info(department);
-    	MemberStudentCertificationRequest request = new MemberStudentCertificationRequest(school, department, image);
-    	memberCertificationsService.save(request, findMember);
+    	log.info("이미지 ContentType : " + image.getContentType());
+    	log.info("이미지 이름 : " + image.getOriginalFilename());
+    	log.info("학과 : " + memberStudentCertificationRequest.getDepartment());
+    	memberCertificationsService.register(memberStudentCertificationRequest, sellerRegisterRequest, image, findMember);
     	return ResponseEntity.ok(ResultResponse.of(CERTIFY_STUDENT_ENROLL_SUCCESS, null));
     }
 
+    @ApiOperation(value = "판매자 등록")
+    @PostMapping(value = "/seller")
+    public ResponseEntity<ResultResponse> certifyStudent(){
+    	final String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        final Member findMember = memberService.findOneByUsername(username).orElseThrow(InvalidCertificateException::new);
 
+    	memberCertificationsService.certify(findMember);
+    	return ResponseEntity.ok(ResultResponse.of(CERTIFY_STUDENT_SUCCESS, null));
+    }
+
+    @ApiOperation(value = "판매자 등록 거절")
+    @PostMapping(value = "/seller")
+    public ResponseEntity<ResultResponse> rejectStudentCertification(){
+    	final String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        final Member findMember = memberService.findOneByUsername(username).orElseThrow(InvalidCertificateException::new);
+
+    	memberCertificationsService.reject(findMember);
+    	return ResponseEntity.ok(ResultResponse.of(CERTIFY_STUDENT_REJECT, null));
+    }
 
 }
