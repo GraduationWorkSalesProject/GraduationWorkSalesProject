@@ -254,7 +254,7 @@ public class MemberController {
     }
 
     @ApiOperation(value = "판매자 등록")
-    @PostMapping(value = "/seller")
+    @PostMapping(value = "/admin/seller/register")
     public ResponseEntity<ResultResponse> certifyStudent(){
     	final String username = SecurityContextHolder.getContext().getAuthentication().getName();
         final Member findMember = memberService.findOneByUsername(username).orElseThrow(InvalidCertificateException::new);
@@ -264,7 +264,7 @@ public class MemberController {
     }
 
     @ApiOperation(value = "판매자 등록 거절")
-    @PostMapping(value = "/seller")
+    @PostMapping(value = "/admin/seller/reject")
     public ResponseEntity<ResultResponse> rejectStudentCertification(){
     	final String username = SecurityContextHolder.getContext().getAuthentication().getName();
         final Member findMember = memberService.findOneByUsername(username).orElseThrow(InvalidCertificateException::new);
