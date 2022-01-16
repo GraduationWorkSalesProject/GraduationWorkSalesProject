@@ -11,4 +11,6 @@ public interface SellerRepository extends JpaRepository<Seller, Long> {
 
 	Optional<Seller> findByMemberId(Long memberId);
 
+	void deleteByMemberId(Long memberId);
+
 }
