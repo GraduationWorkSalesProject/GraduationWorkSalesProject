@@ -42,7 +42,9 @@ public enum ErrorCode {
     //Seller
     SELLER_REGISTER_INPUT_DUPLICATION(400, "S001", "해당 닉네임의 회원은 판매자로 이미 존재합니다."),
     SELLER_NOT_FOUND(400, "S002", "해당 닉네임의 회원은 판매자가 아닙니다."),
-    ;
+
+    //Follow
+
 
     private int status;
     private final String code;

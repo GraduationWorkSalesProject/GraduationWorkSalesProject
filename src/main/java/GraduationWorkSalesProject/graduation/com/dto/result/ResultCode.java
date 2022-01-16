@@ -43,12 +43,14 @@ public enum ResultCode {
     CATEGORY_DELETE_SUCCESS(200,"p114","카테고리 삭제 성공")
     ,
 
-
-
+    //Follow
+    FOLLOW_SUCCESS(200, "F100" ,"팔로우 신청 성공"),
+    CHECK_FOLLOWED_MEMBER_SUCCESS(200, "F101" ,"팔로우 여부 조회 성공"),
+    STOP_FOLLOW_SUCCESS(200, "F102" ,"팔로우 취소 성공"),
 	//Seller
-	SELLER_REGISTER_SUCCESS(200, "S100", "판매자 등록에 성공 행습니다."),
-	CHANGE_SELLER_INFORMATION_SUCCESS(200, "S100", "판매자 정보 변경에 성공 했습니다."),
-	FIND_SELLER_INFORMATION_SUCCESS(200, "S100", "판매자 정보 조회에 성공 했습니다.")
+	SELLER_REGISTER_SUCCESS(200, "S100", "판매자 등록에 성공"),
+	CHANGE_SELLER_INFORMATION_SUCCESS(200, "S100", "판매자 정보 변경에 성공"),
+	FIND_SELLER_INFORMATION_SUCCESS(200, "S100", "판매자 정보 조회에 성공")
 	;
 
     private int status;
