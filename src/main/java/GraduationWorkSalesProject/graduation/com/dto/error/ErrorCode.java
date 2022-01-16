@@ -30,6 +30,8 @@ public enum ErrorCode {
     USERID_NOT_FOUND(400, "M007", "해당 아이디의 회원은 존재하지 않습니다"),
     USERNAME_NOT_FOUND(400, "M008", "해당 닉네임의 회원은 존재하지 않습니다"),
     EXPIRED_CERTIFICATION_CODE(400, "M009", "만료된 인증 코드입니다."),
+    CERTIFY_STUDENT_ENROLL_SUCCESS(400, "M010", "이미 인증요청을 한 상태 입니다."),
+    CERTIFY_STUDENT_ENROLL_NOT_FOUND(400, "M011", "학생 인증 등록을 안한 상태입니다."),
 
     //Product
     PRODUCT_NOT_EXIST(400,"P001","해당 상품이 존재하지 않습니다."),

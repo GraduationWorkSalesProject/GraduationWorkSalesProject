@@ -18,6 +18,7 @@ import javax.persistence.Table;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import GraduationWorkSalesProject.graduation.com.dto.member.MemeberProfileResponse;
 import GraduationWorkSalesProject.graduation.com.vo.Address;
 import GraduationWorkSalesProject.graduation.com.vo.Image;
 import lombok.AccessLevel;
@@ -111,5 +112,21 @@ public class Member {
 
     public void updateRole(MemberRole role) {
         this.role = role;
+    }
+
+    public void updateProfile(String phoneNumber, String address, String detailAddress, String postcode) {
+    	this.phoneNumber = phoneNumber;
+    	this.address = new Address(address, detailAddress, postcode);
+    }
+
+    public MemeberProfileResponse toMemeberProfileResponse() {
+    	return  MemeberProfileResponse.builder()
+				.userName(this.username)
+				.email(this.email)
+				.address(this.address.getAddress())
+				.detailAddress(this.address.getDetailAddress())
+				.postcode(this.address.getPostcode())
+				.phoneNumber(this.phoneNumber)
+			 	.build();
     }
 }

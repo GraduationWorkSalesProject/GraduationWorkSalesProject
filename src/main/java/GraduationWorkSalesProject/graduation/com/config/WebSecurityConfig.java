@@ -1,8 +1,9 @@
 package GraduationWorkSalesProject.graduation.com.config;
 
-import GraduationWorkSalesProject.graduation.com.config.jwt.JwtAuthenticationEntryPoint;
-import GraduationWorkSalesProject.graduation.com.config.jwt.JwtRequestFilter;
-import lombok.RequiredArgsConstructor;
+import static org.springframework.web.cors.CorsConfiguration.ALL;
+
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -22,9 +23,9 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.CorsUtils;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import java.util.List;
-
-import static org.springframework.web.cors.CorsConfiguration.ALL;
+import GraduationWorkSalesProject.graduation.com.config.jwt.JwtAuthenticationEntryPoint;
+import GraduationWorkSalesProject.graduation.com.config.jwt.JwtRequestFilter;
+import lombok.RequiredArgsConstructor;
 
 @Configuration
 @EnableWebSecurity
