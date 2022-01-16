@@ -39,6 +39,9 @@ public enum ErrorCode {
     LIKE_NOT_EXIST(400,"P005","회원이 좋아요한 기록이 없습니다."),
     PRODUCT_REGISTER_ACCESS_DENIED(400,"P006","상품을 등록할 수 있는 권한이 없습니다."),
 
+    //Page
+    PAGE_NUMBER_INVALID(400,"PA001","페이지 번호가 유효하지 않습니다."),
+
     //Seller
     SELLER_REGISTER_INPUT_DUPLICATION(400, "S001", "해당 닉네임의 회원은 판매자로 이미 존재합니다."),
     SELLER_NOT_FOUND(400, "S002", "해당 닉네임의 회원은 판매자가 아닙니다."),

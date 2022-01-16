@@ -60,11 +60,9 @@ public class ProductRegisterRequest {
     @ApiModelProperty(value = "상품 사진4")
     private MultipartFile productImage4;
 
-    private Member member;
-
-    public Product convert(Image productRepImage) {
+    public Product convert(Image productRepImage, Member member) {
         return Product.builder()
-                .member(getMember())
+                .member(member)
                 .name(getProductName())
                 .price(getProductPrice())
                 .information(getProductInforamtion())
@@ -74,8 +72,7 @@ public class ProductRegisterRequest {
                 .build();
     }
 
-    public ProductRegisterRequest(Member member, String productName, int productPrice, String productInforamtion, Long categoryId, List<String> hashtags, int productDeliveryTerm, int productDeliveryPrice,MultipartFile productRepImage, MultipartFile productImage1, MultipartFile productImage2, MultipartFile productImage3, MultipartFile productImage4) {
-        this.member = member;
+    public ProductRegisterRequest(String productName, int productPrice, String productInforamtion, Long categoryId, List<String> hashtags, int productDeliveryTerm, int productDeliveryPrice,MultipartFile productRepImage, MultipartFile productImage1, MultipartFile productImage2, MultipartFile productImage3, MultipartFile productImage4) {
         this.productName = productName;
         this.productPrice = productPrice;
         this.productInforamtion = productInforamtion;

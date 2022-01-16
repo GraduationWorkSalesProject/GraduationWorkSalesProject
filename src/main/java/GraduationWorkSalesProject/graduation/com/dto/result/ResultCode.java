@@ -40,7 +40,8 @@ public enum ResultCode {
     PRODUCT_LIKE_UNDO_SUCCESS(200,"P111","상품 좋아요가 성공적으로 취소되었습니다."),
     PRODUCT_LIKE_NUM_SUCCESS(200,"P112","상품 좋아요 숫자 불러오기 성공"),
     PRODUCT_DELETE_SUCCESS(200,"P113","상품 삭제 성공"),
-    CATEGORY_DELETE_SUCCESS(200,"p114","카테고리 삭제 성공")
+    CATEGORY_DELETE_SUCCESS(200,"p114","카테고리 삭제 성공"),
+    HASHTAG_PRODUCTS_GET_SUCCESS(200, "p115", "해시태그 불러오기 성공")
     ,
 
 

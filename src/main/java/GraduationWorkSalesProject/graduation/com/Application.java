@@ -1,7 +1,7 @@
 package GraduationWorkSalesProject.graduation.com;
 
-import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.domain.AuditorAware;
@@ -18,10 +18,6 @@ import java.util.UUID;
 @SpringBootApplication
 public class Application {
 
-	public static void main(String[] args) {
-		SpringApplication.run(Application.class, args);
-	}
-
 	@Bean
 	public BCryptPasswordEncoder passwordEncoder() {
 		return new BCryptPasswordEncoder();
@@ -31,5 +27,20 @@ public class Application {
 	public AuditorAware<String> auditorProvider() {
 		return () -> Optional.of(UUID.randomUUID().toString());
 	}
+
+	public static final String APPLICATION_LOCATIONS = "spring.config.location="
+			+ "application.yml,"
+			+ "aws.yml";
+
+	public static void main(String[] args) {
+		new SpringApplicationBuilder(Application.class)
+				.properties(APPLICATION_LOCATIONS)
+				.run(args);
+	}
+
 }
+
+
+
+
 

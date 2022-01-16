@@ -1,13 +1,16 @@
 package GraduationWorkSalesProject.graduation.com.dto.product;
 
+import GraduationWorkSalesProject.graduation.com.entity.product.Hashtag;
 import GraduationWorkSalesProject.graduation.com.entity.product.Product;
+import GraduationWorkSalesProject.graduation.com.vo.Image;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.sql.Timestamp;
+import java.util.Date;
+import java.util.List;
 
 @ApiModel(value = "개별 상품 모델")
 @Getter
@@ -34,19 +37,25 @@ public class ProductResponse {
     private String productInformation;
 
     @ApiModelProperty(value = "상품 등록 날짜")
-    private Timestamp productRegisterDate;
+    private Date productRegisterDate;
 
     @ApiModelProperty(value = "상품 마지막 수정 날짜")
-    private Timestamp productUpdateDate;
+    private Date productUpdateDate;
 
     @ApiModelProperty(value = "상품 점수")
     private int productRating;
 
-    @ApiModelProperty(value = "상품 배송기간")
-    private int productDeliveryTerm;
+    @ApiModelProperty(value = "상품 대표이미지")
+    private Image representationImage;
 
-    @ApiModelProperty(value = "상품 배송비")
-    private int productDeliveryPrice;
+    @ApiModelProperty(value = "상품 해시태그")
+    private List<Hashtag> hashtagList;
+
+    @ApiModelProperty(value = "판매자 이름")
+    private String sellerName;
+
+    @ApiModelProperty(value = "좋아요 여부")
+    private Long like;
 
 
     public ProductResponse(Product product) {
@@ -57,8 +66,23 @@ public class ProductResponse {
         this.productRegisterDate = product.getRegisterDate();
         this.productUpdateDate = product.getUpdateDate();
         this.productRating = product.getRating();
-        this.productDeliveryTerm = product.getTerm();
-        this.productDeliveryPrice = product.getDeliveryPrice();
+        this.representationImage = product.getRepresentationImage();
+    }
+
+    public ProductResponse(Long productId, Long categoryId, String categoryName, String productName, int productPrice,
+                           String productInformation, Date productRegisterDate, Date productUpdateDate,
+                           int productRating, Image representationImage, String sellerName) {
+        this.id = productId;
+        this.productName = productName;
+        this.categoryId = categoryId;
+        this.categoryName = categoryName;
+        this.productPrice = productPrice;
+        this.productInformation = productInformation;
+        this.productRegisterDate = productRegisterDate;
+        this.productUpdateDate = productUpdateDate;
+        this.productRating = productRating;
+        this.representationImage = representationImage;
+        this.sellerName = sellerName;
     }
 
 }

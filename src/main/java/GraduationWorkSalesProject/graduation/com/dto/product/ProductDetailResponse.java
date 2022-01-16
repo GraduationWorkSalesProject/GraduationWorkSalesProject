@@ -1,7 +1,9 @@
 package GraduationWorkSalesProject.graduation.com.dto.product;
 
+import GraduationWorkSalesProject.graduation.com.entity.product.Hashtag;
 import GraduationWorkSalesProject.graduation.com.entity.product.Product;
 import GraduationWorkSalesProject.graduation.com.entity.seller.Seller;
+import GraduationWorkSalesProject.graduation.com.vo.Image;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -9,6 +11,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.sql.Timestamp;
+import java.util.List;
 
 @Getter
 @Setter
@@ -58,10 +61,20 @@ public class ProductDetailResponse {
     @ApiModelProperty(value = "판매자명")
     private String sellerName;
 
-    @ApiModelProperty(value = "회원 아이디")
-    private Long memberId;
+    @ApiModelProperty(value = "상품 대표이미지")
+    private Image representationImage;
 
-    public ProductDetailResponse(Product product,Seller seller) {
+    @ApiModelProperty(value = "상품 이미지 목록")
+    private List<Image> productImageList;
+
+    @ApiModelProperty(value = "상품 해시태그")
+    private List<Hashtag> hashtagList;
+
+    @ApiModelProperty(value = "로그인 한 회원의 판매자 팔로우 여부")
+    private int follow;
+
+
+    public ProductDetailResponse(Product product, Seller seller, List<Image> productImageList, List<Hashtag> hashtagList) {
         this.id = product.getId();
         this.productName = product.getName();
         this.productPrice = product.getPrice();
@@ -74,6 +87,8 @@ public class ProductDetailResponse {
         this.sellerId = seller.getId();
         this.sellerInformation = seller.getSellerInformation();
         this.sellerName = seller.getSellerName();
-        this.memberId = seller.getMember().getId();
+        this.representationImage = product.getRepresentationImage();
+        this.productImageList = productImageList;
+        this.hashtagList = hashtagList;
     }
 }

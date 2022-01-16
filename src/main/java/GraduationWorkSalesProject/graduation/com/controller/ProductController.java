@@ -13,6 +13,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.hibernate.validator.constraints.Range;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -32,6 +33,7 @@ import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
 @Validated
 @RestController
 @RequiredArgsConstructor
+@Slf4j
 public class ProductController {
 
     private final MemberService memberService;
@@ -58,11 +60,11 @@ public class ProductController {
         final String username = SecurityContextHolder.getContext().getAuthentication().getName();
         final Member findMember = memberService.findOneByUsername(username).orElseThrow(InvalidCertificateException::new);
 
-        ProductRegisterRequest productRegisterRequest = new ProductRegisterRequest(findMember, productName,
+        ProductRegisterRequest productRegisterRequest = new ProductRegisterRequest(productName,
                 productPrice, productInformation, categoryId, hashtags,
                 productDeliveryTerm, productDeliveryPrice, productRepImage, productImage1, productImage2, productImage3, productImage4);
         try {
-            productService.saveProduct(productRegisterRequest);
+            productService.saveProduct(productRegisterRequest, findMember);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -102,14 +104,14 @@ public class ProductController {
     //ok
     @ApiOperation(value = "특정 카테고리 내 상품들 불러오기")
     @ApiImplicitParam(name = "Authorization", value = "불필요", required = false, example = " ")
-    @GetMapping(value = "/categories/{id}")
-    public ResponseEntity<ResultResponse> getCategoryProducts(@PathVariable Long id) {
-        List<ProductResponse> response = productService.getCategoryProducts(id);
+    @PostMapping(value = "/categoryProducts")
+    public ResponseEntity<ResultResponse> getCategoryProducts(@Validated @RequestBody CategoryProductPageRequest categoryProductPageRequest) {
+        List<ProductResponse> response = productService.getCategoryProducts(categoryProductPageRequest).getContent();
         return ResponseEntity.ok(ResultResponse.of(ResultCode.CATEGORY_PRODUCTS_GET_SUCCESS, response));
     }
 
     //ok
-    @ApiOperation(value = "좋아요 많이 받은 상품 최대 8개 불러오기")
+    @ApiOperation(value = "조회수 높은 상품 최대 8개 불러오기")
     @ApiImplicitParam(name = "Authorization", value = "불필요", required = false, example = " ")
     @GetMapping(value = "/products/lists/like")
     public ResponseEntity<ResultResponse> getBestProducts() {
@@ -129,9 +131,10 @@ public class ProductController {
     //ok
     @ApiOperation(value = "상품 검색 결과")
     @ApiImplicitParam(name = "Authorization", value = "불필요", required = false, example = " ")
-    @GetMapping(value = "/products")
-    public ResponseEntity<ResultResponse> getSearchProducts(@RequestParam(required = false) String search) {
-        List<ProductResponse> response = productService.getSearchResultProduct(search);
+    @PostMapping(value = "/products")
+    public ResponseEntity<ResultResponse> getSearchProducts(@Validated @RequestBody SearchProductPageRequest searchProductPageRequest) {
+
+        List<ProductResponse> response = productService.getSearchResultProduct(searchProductPageRequest).getContent();
         return ResponseEntity.ok(ResultResponse.of(ResultCode.SEARCH_PRODUCTS_GET_SUCCESS, response));
     }
 
@@ -149,9 +152,7 @@ public class ProductController {
     @ApiImplicitParam(name = "Authorization", value = "불필요", required = false, example = " ")
     @GetMapping(value = "/hashtags")
     public ResponseEntity<ResultResponse> getSearchProductsByHashtag(@RequestParam(required = false) Long hashtag_id) {
-
         List<ProductResponse> response = productService.getHashtagSearchResult(hashtag_id);
-
         return ResponseEntity.ok(ResultResponse.of(ResultCode.SEARCH_PRODUCTS_GET_SUCCESS, response));
     }
 
@@ -207,5 +208,26 @@ public class ProductController {
         return ResponseEntity.ok(ResultResponse.of(ResultCode.CATEGORY_DELETE_SUCCESS, null));
     }
 
+    @GetMapping("/hashtagProducts")
+    @ApiImplicitParam(name = "Authorization", value = "불필요", required = false, example = " ")
+    @ApiOperation(value = "상품 가장 많은 해시태그 5개 조회")
+    public ResponseEntity<ResultResponse> hashtagProduct() {
+        List<HashtagProductResponse> response = productService.getHashtagProducts();
+        return ResponseEntity.ok(ResultResponse.of(ResultCode.HASHTAG_PRODUCTS_GET_SUCCESS, response));
+    }
+
+    @GetMapping("/recentProducts")
+    @ApiOperation(value = "페이징된 최근 등록된 상품 전체 조회")
+    public ResponseEntity<ResultResponse> recentProducts(@RequestParam(value = "pageNum") @Range(min = 0, message = "페이지 번호는 0 이상이어야 합니다") int pageNum) {
+        List<ProductResponse> response = productService.getTotalRecentProducts(pageNum).getContent();
+        return ResponseEntity.ok(ResultResponse.of(ResultCode.RECENT_PRODUCTS_GET_SUCCESS, response));
+    }
+
+    @GetMapping("/popularProducts")
+    @ApiOperation(value = "페이징된 인기 상품 전체 조회")
+    public ResponseEntity<ResultResponse> popularProducts(@RequestParam(value = "pageNum") @Range(min = 0, message = "페이지 번호는 0 이상이어야 합니다") int pageNum) {
+        List<ProductResponse> response = productService.getTotalPopularProducts(pageNum).getContent();
+        return ResponseEntity.ok(ResultResponse.of(ResultCode.BEST_PRODUCTS_GET_SUCCESS, response));
+    }
 
 }

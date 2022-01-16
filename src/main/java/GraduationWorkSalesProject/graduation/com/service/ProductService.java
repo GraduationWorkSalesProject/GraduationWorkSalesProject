@@ -1,12 +1,17 @@
 package GraduationWorkSalesProject.graduation.com.service;
 
 import GraduationWorkSalesProject.graduation.com.dto.product.*;
+import GraduationWorkSalesProject.graduation.com.entity.member.Member;
 import GraduationWorkSalesProject.graduation.com.entity.product.*;
 import GraduationWorkSalesProject.graduation.com.entity.seller.Seller;
 import GraduationWorkSalesProject.graduation.com.exception.*;
 import GraduationWorkSalesProject.graduation.com.repository.*;
 import GraduationWorkSalesProject.graduation.com.service.file.FileUploadService;
+import GraduationWorkSalesProject.graduation.com.vo.Image;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -41,12 +46,12 @@ public class ProductService {
     private final ProductImageRepository productImageRepository;
 
     @Transactional
-    public void saveProduct(ProductRegisterRequest productRegisterRequest) throws IOException {
+    public void saveProduct(ProductRegisterRequest productRegisterRequest, Member member) throws IOException {
 
-        if (!productRegisterRequest.getMember().getRole().toString().equals("ROLE_SELLER"))
+        if (!member.getRole().toString().equals("ROLE_SELLER"))
             throw new ProductRegisterCertificationException();
 
-        Product registerProduct = productRegisterRequest.convert(fileUploadService.saveTest(productRegisterRequest.getProductRepImage()));
+        Product registerProduct = productRegisterRequest.convert(fileUploadService.saveTest(productRegisterRequest.getProductRepImage()), member);
 
         List<String> hashtags = productRegisterRequest.getHashtags();
 
@@ -105,7 +110,11 @@ public class ProductService {
     public ProductDetailResponse getProduct(Long productId) {
         Optional<Product> product = productRepository.findById(productId);
         Optional<Seller> seller = sellerRepository.findByMemberId(product.orElseThrow(ProductNotExistException::new).getMember().getId());
-        ProductDetailResponse response = new ProductDetailResponse(product.orElseThrow(ProductNotExistException::new), seller.orElseThrow(SellerNotFoundException::new));
+        List<Image> imageList = new ArrayList<>();
+        for (ProductImage productImage : productImageRepository.findByProductId(productId)){
+            imageList.add(productImage.getImage());
+        }
+        ProductDetailResponse response = new ProductDetailResponse(product.orElseThrow(ProductNotExistException::new), seller.orElseThrow(SellerNotFoundException::new), imageList, productHashtagRepository.findAllByProductId(productId));
         Long categoryId = getCategoryIdByProduct(product.orElseThrow(ProductNotExistException::new).getId());
         response.setCategoryId(categoryId);
         response.setCategoryName(categoryRepository.findById(categoryId).orElseThrow(CategoryNotExistException::new).getCategoryName());
@@ -114,47 +123,31 @@ public class ProductService {
 
 
     public List<ProductResponse> getRecentProduct() {
-        List<Product> products = productRepository.findTop8ByOrderByRegisterDateDesc();
-        List<ProductResponse> response = new ArrayList<>();
-        for (int i = 0; i < products.size(); i++) {
-            ProductResponse productResponse = new ProductResponse(products.get(i));
-            Long categoryId = getCategoryIdByProduct(products.get(i).getId());
-            productResponse.setCategoryId(categoryId);
-            productResponse.setCategoryName(categoryRepository.findById(categoryId).orElseThrow(CategoryNotExistException::new).getCategoryName());
-            response.add(productResponse);
+        List<ProductResponse> response = productRepository.findTop8ByOrderByRegisterDateDescWithJPQL();
+
+        for (ProductResponse productResponse : response) {
+            productResponse.setHashtagList(productHashtagRepository.findAllByProductId(productResponse.getId()));
         }
         return response;
     }
 
     public List<ProductResponse> getBestProduct() {
-        List<Object[]> resultList = likeRepository.findTop8ByLikeWithJPQL();
+        List<ProductResponse> response = productRepository.findTop8ByOrderByViewDescWithJPQL();
 
-        List<ProductResponse> response = new ArrayList<>();
-
-        for (Object[] row : resultList) {
-            Long productId = (Long) row[1];
-            Product product = productRepository.findById(productId).orElseThrow(ProductNotExistException::new);
-            ProductResponse productResponse = new ProductResponse(product);
-            Long category_id = getCategoryIdByProduct(product.getId());
-            productResponse.setCategoryId(category_id);
-            productResponse.setCategoryName(categoryRepository.findById(category_id).orElseThrow(CategoryNotExistException::new).getCategoryName());
-            response.add(productResponse);
+        for (ProductResponse productResponse : response) {
+            productResponse.setHashtagList(productHashtagRepository.findAllByProductId(productResponse.getId()));
         }
+
         return response;
     }
 
-    public List<ProductResponse> getSearchResultProduct(String keyword) {
-        List<Product> products = productRepository.findAllByNameContaining(keyword);
-        List<ProductResponse> response = new ArrayList<>();
-        for (Product product : products) {
-            ProductResponse productResponse = new ProductResponse(product);
-            Long categoryId = getCategoryIdByProduct(product.getId());
-            productResponse.setCategoryId(categoryId);
-            productResponse.setCategoryName(categoryRepository.findById(categoryId).orElseThrow(CategoryNotExistException::new).getCategoryName());
-            response.add(productResponse);
-        }
-        return response;
+    public Page<ProductResponse> getSearchResultProduct(SearchProductPageRequest searchProductPageRequest) {
+        PageRequest pageRequest = PageRequest.of(searchProductPageRequest.getPage(), 8, Sort.Direction.DESC, "registerDate");
+        Page<ProductResponse> products = productRepository.findAllByNameContainingWithJPQL(pageRequest, searchProductPageRequest.getKeyword());
+
+        return products;
     }
+
 
     @Transactional
     public void likeProductAdd(Long memberId, Long productId) {
@@ -191,21 +184,22 @@ public class ProductService {
         return categoryRepository.findAll();
     }
 
-    public List<ProductResponse> getCategoryProducts(Long categoryId) {
-        List<CategoryProduct> categoryProductsList = categoryProductRepository.findAllByCategoryId(categoryId);
-        List<ProductResponse> response = new ArrayList<>();
+    public Page<ProductResponse> getCategoryProducts(CategoryProductPageRequest categoryProductPageRequest) {
 
-        //if list is empty
-        //need exception?
+        PageRequest pageRequest = null;
 
-        //if list is not empty
-        for (CategoryProduct categoryProduct : categoryProductsList) {
-            ProductResponse productResponse = new ProductResponse(categoryProduct.getProduct());
-            productResponse.setCategoryId(categoryId);
-            productResponse.setCategoryName(categoryRepository.findById(categoryId).orElseThrow(CategoryNotExistException::new).getCategoryName());
-            response.add(productResponse);
+        if (categoryProductPageRequest.getSort() == "최신순")
+            pageRequest = PageRequest.of(categoryProductPageRequest.getPage(), 8, Sort.Direction.DESC, "registerDate");
+
+        if (categoryProductPageRequest.getSort() == "인기순")
+            pageRequest = PageRequest.of(categoryProductPageRequest.getPage(), 8, Sort.Direction.DESC, "view");
+
+        Page<ProductResponse> productResponsePage = productRepository.findAllWithJPQL(pageRequest, categoryProductPageRequest.getCategoryId());
+        for (ProductResponse productResponse : productResponsePage.getContent()) {
+            productResponse.setHashtagList(productHashtagRepository.findAllByProductId(productResponse.getId()));
         }
-        return response;
+
+        return productResponsePage;
     }
 
     @Transactional
@@ -220,7 +214,6 @@ public class ProductService {
         categoryRepository.save(newCategory);
 
     }
-
 
     public List<ProductResponse> getHashtagSearchResult(Long hashtagId) {
         List<ProductHashtag> productHashtagList = productHashtagRepository.findAllByHashtagId(hashtagId);
@@ -241,5 +234,39 @@ public class ProductService {
         return categoryId;
     }
 
+    public List<HashtagProductResponse> getHashtagProducts() {
+        List<Object[]> hashtags = productHashtagRepository.findTop5ByLikeWithJPQL();
 
+        List<HashtagProductResponse> response = new ArrayList<>();
+
+        for (Object[] row : hashtags) {
+            HashtagProductResponse hashtagProductResponse = new HashtagProductResponse((Long) row[1], row[2].toString(), productRepository.findProductImageJPQL((Long) row[1]).get(1));
+            System.out.println(productRepository.findProductImageJPQL((Long) row[1]));
+            response.add(hashtagProductResponse);
+        }
+
+        return response;
+    }
+
+    public Page<ProductResponse> getTotalRecentProducts(int pageNum) {
+        PageRequest pageRequest = PageRequest.of(pageNum, 8, Sort.Direction.DESC, "registerDate");
+        if (productRepository.findAllWithJPQL(pageRequest).getTotalPages() <= pageNum)
+            throw new PageNumberInvalidException();
+        Page<ProductResponse> productResponsePage = productRepository.findAllWithJPQL(pageRequest);
+        for (ProductResponse productResponse : productResponsePage.getContent()) {
+            productResponse.setHashtagList(productHashtagRepository.findAllByProductId(productResponse.getId()));
+        }
+        return productResponsePage;
+    }
+
+    public Page<ProductResponse> getTotalPopularProducts(int pageNum) {
+        PageRequest pageRequest = PageRequest.of(pageNum, 8, Sort.Direction.DESC, "view");
+        if (productRepository.findAllWithJPQL(pageRequest).getTotalPages() <= pageNum)
+            throw new PageNumberInvalidException();
+        Page<ProductResponse> productResponsePage = productRepository.findAllWithJPQL(pageRequest);
+        for (ProductResponse productResponse : productResponsePage.getContent()) {
+            productResponse.setHashtagList(productHashtagRepository.findAllByProductId(productResponse.getId()));
+        }
+        return productResponsePage;
+    }
 }

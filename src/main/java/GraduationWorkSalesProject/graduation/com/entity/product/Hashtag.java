@@ -22,8 +22,10 @@ public class Hashtag {
     private String hashtagName;
 
     @Builder
-    public Hashtag(String hashtagName){
+    public Hashtag(Long id, String hashtagName){
+        this.id = id;
         this.hashtagName = hashtagName;
     }
+
 
 }

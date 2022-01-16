@@ -48,7 +48,6 @@ public class Product {
     @CreatedDate
     private Timestamp registerDate;
 
-
     @Column(name = "product_update_date")
     @LastModifiedDate
     private Timestamp updateDate;
@@ -61,6 +60,9 @@ public class Product {
 
     @Column(name = "product_delivery_price")
     private int deliveryPrice;
+
+    @Column(name = "product_view")
+    private int view;
 
     @Embedded
     @AttributeOverrides({
