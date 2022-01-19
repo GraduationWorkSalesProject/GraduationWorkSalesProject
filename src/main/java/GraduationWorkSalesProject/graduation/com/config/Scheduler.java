@@ -13,11 +13,11 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 
 @Slf4j
-@Component
+//@Component
 @RequiredArgsConstructor
 public class Scheduler {
 
-    private final CertificationRepository certificationRepository;
+    /*private final CertificationRepository certificationRepository;
     private final CertificateRepository certificateRepository;
 
     @Transactional
@@ -29,5 +29,5 @@ public class Scheduler {
 
         certificationRepository.deleteByExpirationDateTimeLessThan(before3Minutes);
         certificateRepository.deleteByExpirationDateTimeLessThan(before30Minutes);
-    }
+    }*/
 }
