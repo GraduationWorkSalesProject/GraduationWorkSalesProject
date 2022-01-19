@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 
-@Primary
+
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor

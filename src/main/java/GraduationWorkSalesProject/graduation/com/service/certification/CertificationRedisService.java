@@ -1,18 +1,21 @@
 package GraduationWorkSalesProject.graduation.com.service.certification;
 
+import GraduationWorkSalesProject.graduation.com.dto.member.MemberCertificationCodeRequest;
 import GraduationWorkSalesProject.graduation.com.entity.certify.Certification;
 import GraduationWorkSalesProject.graduation.com.repository.CertificationRedisRepository;
 import GraduationWorkSalesProject.graduation.com.repository.CertificationRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
+@Primary
 @Service
 @RequiredArgsConstructor
-public class CertificationRedisService {
+public class CertificationRedisService implements CertificationService{
 
     private final CertificationRedisRepository certificationRepository;
 
@@ -28,5 +31,10 @@ public class CertificationRedisService {
     @CacheEvict(value = "certification", key = "#token")
     public void delete(String token){
         certificationRepository.deleteById(token);
+    }
+
+    @Override
+    public void validateCertification(MemberCertificationCodeRequest request) {
+
     }
 }

@@ -6,13 +6,15 @@ import GraduationWorkSalesProject.graduation.com.repository.CertificateRepositor
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
+@Primary
 @Service
 @RequiredArgsConstructor
-public class CertificateRedisService {
+public class CertificateRedisService implements CertificateService{
 
     private final CertificateRedisRepository certificateRepository;
 
@@ -28,5 +30,10 @@ public class CertificateRedisService {
     @CacheEvict(value = "certificate", key = "#token")
     public void delete(String token){
         certificateRepository.deleteById(token);
+    }
+
+    @Override
+    public void validateCertificate(String token) {
+
     }
 }
