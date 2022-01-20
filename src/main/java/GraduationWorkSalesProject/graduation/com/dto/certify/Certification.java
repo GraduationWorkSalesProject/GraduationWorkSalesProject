@@ -1,34 +1,20 @@
-package GraduationWorkSalesProject.graduation.com.entity.certify;
+package GraduationWorkSalesProject.graduation.com.dto.certify;
 
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.data.redis.core.RedisHash;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.concurrent.ThreadLocalRandom;
 
-@Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-//@RedisHash(value = "certification", timeToLive = 3 * 60)
-@Table(name = "certifications")
 public class Certification {
 
-//    @Id
-    @Id
-    @Column(name = "certificate_token")
     private String token;
-    @Column(name = "certificate_code")
     private String certificationCode;
-    @Column(name = "certificate_expiration_date")
     private LocalDateTime expirationDateTime;
 
     private Certification(String certificationCode, LocalDateTime expirationDateTime, String token) {

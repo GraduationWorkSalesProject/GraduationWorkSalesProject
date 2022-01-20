@@ -2,7 +2,6 @@ package GraduationWorkSalesProject.graduation.com.config.jwt;
 
 import GraduationWorkSalesProject.graduation.com.exception.InvalidAuthorizationHeaderException;
 import GraduationWorkSalesProject.graduation.com.service.JwtUserDetailsService;
-import GraduationWorkSalesProject.graduation.com.service.MemberService;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import lombok.RequiredArgsConstructor;
@@ -29,24 +28,20 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 
     private final JwtUserDetailsService jwtUserDetailsService;
     private final JwtTokenUtil jwtTokenUtil;
-    private final MemberService memberService;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        String username = null;
-        String jwtToken = null;
-        String requestTokenHeader = request.getHeader("Authorization");
+        final String requestTokenHeader = request.getHeader("Authorization");
         log.debug("[Token] {}", requestTokenHeader);
 
         try {
-            if (requestTokenHeader == null || !requestTokenHeader.startsWith("Bearer ")) {
+            if (requestTokenHeader == null || !requestTokenHeader.startsWith("Bearer "))
                 throw new InvalidAuthorizationHeaderException();
-            }
-            jwtToken = requestTokenHeader.substring(7);
-            username = jwtTokenUtil.getUsernameFromAccessToken(jwtToken);
+            final String jwtToken = requestTokenHeader.substring(7);
+            final String username = jwtTokenUtil.getUsernameFromAccessToken(jwtToken);
 
             if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                UserDetails userDetails = this.jwtUserDetailsService.loadUserByUsername(username);
+                final UserDetails userDetails = this.jwtUserDetailsService.loadUserByUsername(username);
 
                 if (jwtTokenUtil.validateAccessToken(jwtToken)) {
                     UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
