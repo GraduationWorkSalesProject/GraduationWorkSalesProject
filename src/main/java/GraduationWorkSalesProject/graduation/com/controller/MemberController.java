@@ -1,23 +1,6 @@
 package GraduationWorkSalesProject.graduation.com.controller;
 
-import static GraduationWorkSalesProject.graduation.com.dto.result.ResultCode.CERTIFY_EMAIL_SUCCESS;
-import static GraduationWorkSalesProject.graduation.com.dto.result.ResultCode.CERTIFY_STUDENT_ENROLL_SUCCESS;
-import static GraduationWorkSalesProject.graduation.com.dto.result.ResultCode.CERTIFY_STUDENT_REJECT;
-import static GraduationWorkSalesProject.graduation.com.dto.result.ResultCode.CERTIFY_STUDENT_SUCCESS;
-import static GraduationWorkSalesProject.graduation.com.dto.result.ResultCode.CHANGE_PASSWORD_SUCCESS;
-import static GraduationWorkSalesProject.graduation.com.dto.result.ResultCode.CHANGE_PROFILE_SUCCESS;
-import static GraduationWorkSalesProject.graduation.com.dto.result.ResultCode.EMAIL_DUPLICATION;
-import static GraduationWorkSalesProject.graduation.com.dto.result.ResultCode.EMAIL_VALID;
-import static GraduationWorkSalesProject.graduation.com.dto.result.ResultCode.FIND_USERID_SUCCESS;
-import static GraduationWorkSalesProject.graduation.com.dto.result.ResultCode.JOIN_SUCCESS;
-import static GraduationWorkSalesProject.graduation.com.dto.result.ResultCode.LEAVE_SUCCESS;
-import static GraduationWorkSalesProject.graduation.com.dto.result.ResultCode.LOGIN_SUCCESS;
-import static GraduationWorkSalesProject.graduation.com.dto.result.ResultCode.REISSUE_SUCCESS;
-import static GraduationWorkSalesProject.graduation.com.dto.result.ResultCode.SEND_MAIL_SUCCESS;
-import static GraduationWorkSalesProject.graduation.com.dto.result.ResultCode.USERID_DUPLICATION;
-import static GraduationWorkSalesProject.graduation.com.dto.result.ResultCode.USERID_VALID;
-import static GraduationWorkSalesProject.graduation.com.dto.result.ResultCode.USERNAME_DUPLICATION;
-import static GraduationWorkSalesProject.graduation.com.dto.result.ResultCode.USERNAME_VALID;
+import static GraduationWorkSalesProject.graduation.com.dto.result.ResultCode.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
 
@@ -25,48 +8,31 @@ import java.io.IOException;
 import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.constraints.NotNull;
 
+import GraduationWorkSalesProject.graduation.com.dto.member.*;
+import GraduationWorkSalesProject.graduation.com.exception.*;
+import GraduationWorkSalesProject.graduation.com.util.RedisUtil;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import GraduationWorkSalesProject.graduation.com.dto.certify.Certification;
+import GraduationWorkSalesProject.graduation.com.dto.certify.Certificate;
 import GraduationWorkSalesProject.graduation.com.dto.certification.CertificateResponse;
 import GraduationWorkSalesProject.graduation.com.dto.certification.CertificationCodeResponse;
-import GraduationWorkSalesProject.graduation.com.dto.member.LoginResponse;
-import GraduationWorkSalesProject.graduation.com.dto.member.MemberCertificationCodeRequest;
-import GraduationWorkSalesProject.graduation.com.dto.member.MemberEmailCertificationRequest;
-import GraduationWorkSalesProject.graduation.com.dto.member.MemberEmailCheckRequest;
-import GraduationWorkSalesProject.graduation.com.dto.member.MemberFindUseridResponse;
-import GraduationWorkSalesProject.graduation.com.dto.member.MemberHelpFindPasswordRequest;
-import GraduationWorkSalesProject.graduation.com.dto.member.MemberHelpFindUseridRequest;
-import GraduationWorkSalesProject.graduation.com.dto.member.MemberJoinRequest;
-import GraduationWorkSalesProject.graduation.com.dto.member.MemberJwtTokenRequest;
-import GraduationWorkSalesProject.graduation.com.dto.member.MemberLoginRequest;
-import GraduationWorkSalesProject.graduation.com.dto.member.MemberStudentCertificationRequest;
-import GraduationWorkSalesProject.graduation.com.dto.member.MemberUseridCheckRequest;
-import GraduationWorkSalesProject.graduation.com.dto.member.MemberUsernameCheckRequest;
-import GraduationWorkSalesProject.graduation.com.dto.member.MemeberProfileEditRequest;
-import GraduationWorkSalesProject.graduation.com.dto.member.MemeberProfileResponse;
 import GraduationWorkSalesProject.graduation.com.dto.result.ResultCode;
 import GraduationWorkSalesProject.graduation.com.dto.result.ResultResponse;
 import GraduationWorkSalesProject.graduation.com.dto.seller.SellerRegisterRequest;
-import GraduationWorkSalesProject.graduation.com.entity.certify.Certificate;
-import GraduationWorkSalesProject.graduation.com.entity.certify.Certification;
 import GraduationWorkSalesProject.graduation.com.entity.member.Member;
-import GraduationWorkSalesProject.graduation.com.exception.EmailNotFoundException;
-import GraduationWorkSalesProject.graduation.com.exception.InvalidCertificateException;
 import GraduationWorkSalesProject.graduation.com.service.MemberCertificationsService;
 import GraduationWorkSalesProject.graduation.com.service.MemberService;
-import GraduationWorkSalesProject.graduation.com.service.certificate.CertificateService;
-import GraduationWorkSalesProject.graduation.com.service.certification.CertificationService;
 import GraduationWorkSalesProject.graduation.com.service.mail.MailServiceGmailSMTP;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -83,51 +49,67 @@ public class MemberController {
     private final MemberService memberService;
     private final MemberCertificationsService memberCertificationsService;
     private final MailServiceGmailSMTP mailService;
-    private final CertificationService certificationService;
-    private final CertificateService certificateService;
+    private final RedisUtil redisUtil;
 
-    @ApiOperation(value = "로그인", notes = "로그인 성공 시, JWT 토큰을 Response Header에 넣어서 반환합니다")
+    @ApiOperation(value = "로그인", notes = "Access Token은 Response Body에, Refresh Token은 Cookie의 refreshToken에 담아서 전달합니다.")
     @ApiImplicitParam(name = "Authorization", value = "불필요", required = false, example = " ")
     @PostMapping(value = "/login", consumes = APPLICATION_JSON_VALUE)
-    public ResponseEntity<ResultResponse> login(@Validated @RequestBody MemberLoginRequest request) {
+    public ResponseEntity<ResultResponse> login(
+            @Validated @RequestBody MemberLoginRequest request,
+            HttpServletResponse httpServletResponse) {
         final LoginResponse response = memberService.checkUseridPassword(request.getUserid(), request.getPassword());
-
-        final String accessToken = memberService.createAccessTokenByUserid(request.getUserid());
-        final String refreshToken = memberService.updateRefreshToken(request);
+        final JwtDTO jwtDTO = memberService.generateJwts(response.getUsername());
+        response.setAccessToken(jwtDTO.getAccessToken());
+        putRefreshTokenToCookie(httpServletResponse, jwtDTO.getRefreshToken());
 
         return ResponseEntity.ok()
-                .header("access-token", accessToken)
-                .header("refresh-token", refreshToken)
                 .body(ResultResponse.of(LOGIN_SUCCESS, response));
     }
 
-    @ApiOperation(value = "JWT 토큰 재발급", notes = "재발급 성공 시, JWT 토큰을 Response Header에 넣어서 반환합니다")
+    @ApiOperation(value = "JWT 토큰 재발급", notes = "Access Token은 Response Body에, Refresh Token은 Cookie의 refreshToken에 담아서 전달합니다.")
     @ApiImplicitParam(name = "Authorization", value = "불필요", required = false, example = " ")
     @PostMapping(value = "/reissue", consumes = APPLICATION_JSON_VALUE)
-    public ResponseEntity<ResultResponse> reIssueAccessToken(@Validated @RequestBody MemberJwtTokenRequest request) {
-        memberService.validateJwts(request.getAccessToken(), request.getRefreshToken());
-
-        final String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        final String accessToken = memberService.createAccessTokenByUsername(username);
+    public ResponseEntity<ResultResponse> reIssueAccessToken(
+            @CookieValue(value = "refreshToken") Cookie cookie,
+            HttpServletResponse httpServletResponse) {
+        final String username = memberService.validateAndDeleteRefreshToken(cookie.getValue());
+        final JwtDTO jwtDTO = memberService.generateJwts(username);
+        final ReIssueJwtResponse response = new ReIssueJwtResponse(jwtDTO.getAccessToken());
+        putRefreshTokenToCookie(httpServletResponse, jwtDTO.getRefreshToken());
 
         return ResponseEntity.ok()
-                .header("access-token", accessToken)
-                .body(ResultResponse.of(REISSUE_SUCCESS, null));
+                .body(ResultResponse.of(REISSUE_SUCCESS, response));
+    }
+
+    private void putRefreshTokenToCookie(HttpServletResponse httpServletResponse, String refreshToken) {
+        ResponseCookie cookie = ResponseCookie.from("refreshToken", refreshToken)
+                .httpOnly(true)
+                /*.secure(true)
+                .sameSite("strict")
+                .domain("domain")*/
+                .maxAge(14 * 24 * 60 * 60)
+                .path("/")
+                .build();
+
+        httpServletResponse.addHeader("Set-Cookie", cookie.toString());
     }
 
     @ApiOperation(value = "이메일 인증 코드 발송")
     @ApiImplicitParam(name = "Authorization", value = "불필요", required = false, example = " ")
     @PostMapping(value = "/verification/email", consumes = APPLICATION_JSON_VALUE)
     public ResponseEntity<ResultResponse> sendCertificationCode(@Validated @RequestBody MemberEmailCertificationRequest request) {
+        if (memberService.findOneByEmail(request.getEmail()).isPresent())
+            throw new EmailAlreadyExistException();
+
         final String subject = "[그라듀] 이메일 인증코드 안내";
         final Certification certification = Certification.create(request.getToken());
-        certificationService.save(certification);
-
-        mailService.sendMail(request.getEmail(), subject, certification.getCertificationCode());
         final CertificationCodeResponse response = new CertificationCodeResponse(
                 certification.getCertificationCode(),
                 certification.getExpirationDateTime().format(DateTimeFormatter.ofPattern("yyyy.MM.dd hh:mm:ss")));
 
+        mailService.sendMail(request.getEmail(), subject, certification.getCertificationCode());
+        redisUtil.set(certification.getToken(), certification.getCertificationCode(), 3);
+        redisUtil.set(certification.getCertificationCode(), request.getEmail(), 3);
         return ResponseEntity.ok(ResultResponse.of(SEND_MAIL_SUCCESS, response));
     }
 
@@ -135,14 +117,19 @@ public class MemberController {
     @ApiImplicitParam(name = "Authorization", value = "불필요", required = false, example = " ")
     @PostMapping(value = "/verification/code", consumes = APPLICATION_JSON_VALUE)
     public ResponseEntity<ResultResponse> verifyCertificationCode(@Validated @RequestBody MemberCertificationCodeRequest request) {
-        certificationService.validateCertification(request);
-        certificationService.delete(request.getToken());
+        final String certificationCode = (String) redisUtil.get(request.getToken());
+        final String email = (String) redisUtil.get(certificationCode);
+        if (certificationCode == null)
+            throw new InvalidTokenException();
+        else if (!certificationCode.equals(request.getCertificationCode()))
+            throw new CertificationCodeNotMatchException();
 
         final Certificate certificate = Certificate.create();
-        certificateService.save(certificate);
+        redisUtil.set(certificate.getToken(), email, 30);
         final CertificateResponse response = new CertificateResponse(
                 certificate.getToken(),
                 certificate.getExpirationDateTime().format(DateTimeFormatter.ofPattern("yyyy.MM.dd hh:mm:ss")));
+        redisUtil.delete(request.getToken());
 
         return ResponseEntity.ok(ResultResponse.of(CERTIFY_EMAIL_SUCCESS, response));
     }
@@ -181,9 +168,11 @@ public class MemberController {
     @ApiImplicitParam(name = "Authorization", value = "불필요", required = false, example = " ")
     @PostMapping(value = "/join", consumes = APPLICATION_JSON_VALUE)
     public ResponseEntity<ResultResponse> join(@Validated @RequestBody MemberJoinRequest request) {
-        certificateService.validateCertificate(request.getToken());
-        certificateService.delete(request.getToken());
+        final String email = (String) redisUtil.get(request.getToken());
+        if (email == null || !email.equals(request.getEmail()))
+            throw new InvalidCertificateException();
         memberService.save(request);
+        redisUtil.delete(request.getToken());
 
         return ResponseEntity.ok(ResultResponse.of(JOIN_SUCCESS, null));
     }
@@ -201,11 +190,13 @@ public class MemberController {
     @ApiImplicitParam(name = "Authorization", value = "불필요", required = false, example = " ")
     @PostMapping(value = "/help/id", consumes = APPLICATION_JSON_VALUE)
     public ResponseEntity<ResultResponse> helpFindUserid(@Validated @RequestBody MemberHelpFindUseridRequest request) {
-        certificateService.validateCertificate(request.getToken());
+        final String email = (String) redisUtil.get(request.getToken());
+        if (email == null || !email.equals(request.getEmail()))
+            throw new InvalidCertificateException();
 
         final Member member = memberService.findOneByEmail(request.getEmail()).orElseThrow(EmailNotFoundException::new);
         final MemberFindUseridResponse response = new MemberFindUseridResponse(member.getUserid());
-        certificateService.delete(request.getToken());
+        redisUtil.delete(request.getToken());
 
         return ResponseEntity.ok(ResultResponse.of(FIND_USERID_SUCCESS, response));
     }
@@ -214,23 +205,24 @@ public class MemberController {
     @ApiImplicitParam(name = "Authorization", value = "불필요", required = false, example = " ")
     @PostMapping(value = "/help/password", consumes = APPLICATION_JSON_VALUE)
     public ResponseEntity<ResultResponse> helpChangePassword(@Validated @RequestBody MemberHelpFindPasswordRequest request) {
-        certificateService.validateCertificate(request.getToken());
+        final String email = (String) redisUtil.get(request.getToken());
+        if (email == null)
+            throw new InvalidCertificateException();
 
         memberService.changePassword(request.getUserid(), request.getNewPassword(), request.getCheckPassword());
-        certificateService.delete(request.getToken());
+        redisUtil.delete(request.getToken());
 
         return ResponseEntity.ok(ResultResponse.of(CHANGE_PASSWORD_SUCCESS, null));
     }
 
 
-
     @ApiOperation(value = "회원 정보 수정")
     @PostMapping(value = "/members/profile", consumes = APPLICATION_JSON_VALUE)
     public ResponseEntity<ResultResponse> editProfile(@Validated @RequestBody MemeberProfileEditRequest request) {
-    	final Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-    	final UserDetails userDetails = (UserDetails) principal;
+        final Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        final UserDetails userDetails = (UserDetails) principal;
 
-    	final MemeberProfileResponse response = memberService.changeProfile(request, userDetails.getUsername());
+        final MemeberProfileResponse response = memberService.changeProfile(request, userDetails.getUsername());
 
         return ResponseEntity.ok(ResultResponse.of(CHANGE_PROFILE_SUCCESS, response));
     }
@@ -239,38 +231,38 @@ public class MemberController {
     @ApiOperation(value = "회원 대학생 인증 등록")
     @PostMapping(value = "/student/certification", consumes = MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ResultResponse> registerStudentCertification(
-    			@RequestParam(value = "학생증",required = true) @NotNull(message = "학생증 사진을 첨부해 주세요.") MultipartFile image,
-    			@Validated MemberStudentCertificationRequest memberStudentCertificationRequest,
-    			@Validated SellerRegisterRequest sellerRegisterRequest) throws IOException {
-    	final String username = SecurityContextHolder.getContext().getAuthentication().getName();
+            @RequestParam(value = "학생증", required = true) @NotNull(message = "학생증 사진을 첨부해 주세요.") MultipartFile image,
+            @Validated MemberStudentCertificationRequest memberStudentCertificationRequest,
+            @Validated SellerRegisterRequest sellerRegisterRequest) throws IOException {
+        final String username = SecurityContextHolder.getContext().getAuthentication().getName();
         final Member findMember = memberService.findOneByUsername(username).orElseThrow(InvalidCertificateException::new);
 
 
-    	log.info("이미지 ContentType : " + image.getContentType());
-    	log.info("이미지 이름 : " + image.getOriginalFilename());
-    	log.info("학과 : " + memberStudentCertificationRequest.getDepartment());
-    	memberCertificationsService.register(memberStudentCertificationRequest, sellerRegisterRequest, image, findMember);
-    	return ResponseEntity.ok(ResultResponse.of(CERTIFY_STUDENT_ENROLL_SUCCESS, null));
+        log.info("이미지 ContentType : " + image.getContentType());
+        log.info("이미지 이름 : " + image.getOriginalFilename());
+        log.info("학과 : " + memberStudentCertificationRequest.getDepartment());
+        memberCertificationsService.register(memberStudentCertificationRequest, sellerRegisterRequest, image, findMember);
+        return ResponseEntity.ok(ResultResponse.of(CERTIFY_STUDENT_ENROLL_SUCCESS, null));
     }
 
     @ApiOperation(value = "판매자 등록")
     @PostMapping(value = "/admin/seller/register")
-    public ResponseEntity<ResultResponse> certifyStudent(){
-    	final String username = SecurityContextHolder.getContext().getAuthentication().getName();
+    public ResponseEntity<ResultResponse> certifyStudent() {
+        final String username = SecurityContextHolder.getContext().getAuthentication().getName();
         final Member findMember = memberService.findOneByUsername(username).orElseThrow(InvalidCertificateException::new);
 
-    	memberCertificationsService.certify(findMember);
-    	return ResponseEntity.ok(ResultResponse.of(CERTIFY_STUDENT_SUCCESS, null));
+        memberCertificationsService.certify(findMember);
+        return ResponseEntity.ok(ResultResponse.of(CERTIFY_STUDENT_SUCCESS, null));
     }
 
     @ApiOperation(value = "판매자 등록 거절")
     @PostMapping(value = "/admin/seller/reject")
-    public ResponseEntity<ResultResponse> rejectStudentCertification(){
-    	final String username = SecurityContextHolder.getContext().getAuthentication().getName();
+    public ResponseEntity<ResultResponse> rejectStudentCertification() {
+        final String username = SecurityContextHolder.getContext().getAuthentication().getName();
         final Member findMember = memberService.findOneByUsername(username).orElseThrow(InvalidCertificateException::new);
 
-    	memberCertificationsService.reject(findMember);
-    	return ResponseEntity.ok(ResultResponse.of(CERTIFY_STUDENT_REJECT, null));
+        memberCertificationsService.reject(findMember);
+        return ResponseEntity.ok(ResultResponse.of(CERTIFY_STUDENT_REJECT, null));
     }
 
 }
