@@ -78,9 +78,9 @@ public class FollowService {
 	 */
 	@Transactional
 	public void stopFollow(Member follower, Member followed) {
-		//둘의 팔로우 여부 체크
-		final Follow follow = followRepository.findByFollowerIdAndFollowedId(follower.getId(),
-				followed.getId()).orElseThrow(NotFollowedException::new);
+		// 둘의 팔로우 여부 체크
+		final Follow follow = followRepository.findByFollowerIdAndFollowedId(follower.getId(), followed.getId())
+				.orElseThrow(NotFollowedException::new);
 		followRepository.delete(follow);
 	}
 

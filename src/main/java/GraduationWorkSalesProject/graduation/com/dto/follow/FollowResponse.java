@@ -1,10 +1,9 @@
 package GraduationWorkSalesProject.graduation.com.dto.follow;
 
 import GraduationWorkSalesProject.graduation.com.entity.follow.Follow;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 
-@AllArgsConstructor
+
 @Getter
 public class FollowResponse {
 	private String username;
