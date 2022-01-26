@@ -41,5 +41,19 @@ public class Follow {
     @JoinColumn(name="followed_id")
     private Member followed; // 팔로우를 당한 사람
 
+    public static Follow of(Long id, Member follower, Member followed) {
+        return Follow.builder()
+                .id(id)
+                .follower(follower)
+                .followed(followed)
+                .build();
+    }
+
+    public static Follow of(Member follower, Member followed) {
+        return Follow.builder()
+                .follower(follower)
+                .followed(followed)
+                .build();
+    }
 
 }

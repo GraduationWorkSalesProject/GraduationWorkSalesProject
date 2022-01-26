@@ -46,7 +46,8 @@ public enum ErrorCode {
     SELLER_NOT_FOUND(400, "S002", "해당 닉네임의 회원은 판매자가 아닙니다."),
 
     //Follow
-
+    NOT_FOLLOWED(400, "F001", "팔로우 상태가 아닙니다.")
+;
 
     private int status;
     private final String code;

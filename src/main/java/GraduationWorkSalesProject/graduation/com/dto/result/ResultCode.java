@@ -50,10 +50,14 @@ public enum ResultCode {
     FOLLOW_SUCCESS(200, "F100" ,"팔로우 신청 성공"),
     CHECK_FOLLOWED_MEMBER_SUCCESS(200, "F101" ,"팔로우 여부 조회 성공"),
     STOP_FOLLOW_SUCCESS(200, "F102" ,"팔로우 취소 성공"),
-	  //Seller
-	  SELLER_REGISTER_SUCCESS(200, "S100", "판매자 등록에 성공"),
-	  CHANGE_SELLER_INFORMATION_SUCCESS(200, "S100", "판매자 정보 변경에 성공"),
-	  FIND_SELLER_INFORMATION_SUCCESS(200, "S100", "판매자 정보 조회에 성공")
+    FIND_FOLLOWEDS_SUCCESS(200, "F103" ,"내가 팔로우 한 사람 목록 조회 성공"),
+    FIND_FOLLOWERS_SUCCESS(200, "F104" ,"나를 팔로우 한 사람 목록 조회 성공"),
+    COUNT_FOLLOWEDS_SUCCESS(200, "F105" ,"내가 팔로우 한 사람 수 조회 성공"),
+    COUNT_FOLLOWERS_SUCCESS(200, "F106" ,"나를 팔로우 한 사람 수 조회 성공"),
+	//Seller
+	SELLER_REGISTER_SUCCESS(200, "S100", "판매자 등록에 성공"),
+	CHANGE_SELLER_INFORMATION_SUCCESS(200, "S100", "판매자 정보 변경에 성공"),
+	FIND_SELLER_INFORMATION_SUCCESS(200, "S100", "판매자 정보 조회에 성공")
 
 	;
 
