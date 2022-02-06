@@ -32,6 +32,7 @@ public enum ErrorCode {
     EXPIRED_CERTIFICATION_CODE(400, "M009", "만료된 인증 코드입니다."),
     CERTIFY_STUDENT_ENROLL_SUCCESS(400, "M010", "이미 인증요청을 한 상태 입니다."),
     CERTIFY_STUDENT_ENROLL_NOT_FOUND(400, "M011", "학생 인증 등록을 안한 상태입니다."),
+    EMAIL_ALREADY_EXIST(400, "M012", "이미 존재하는 이메일입니다."),
 
     //Product
     PRODUCT_NOT_EXIST(400,"P001","해당 상품이 존재하지 않습니다."),

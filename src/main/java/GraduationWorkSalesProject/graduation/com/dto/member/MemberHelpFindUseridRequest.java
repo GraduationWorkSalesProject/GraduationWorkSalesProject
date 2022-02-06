@@ -18,7 +18,7 @@ public class MemberHelpFindUseridRequest {
     @ApiModelProperty(value = "이메일", example = "example@gmail.com", required = true)
     @Email(message = "이메일 형식이 잘못되었습니다.")
     @NotEmpty(message = "이메일을 입력해주세요.")
-    String email;
+    private String email;
 
     @ApiModelProperty(value = "인증 토큰", example = "wjRMbgPxtlKklzV2", required = true)
     @Length(min = 16, max = 16, message = "인증 토큰은 16자리입니다.")

@@ -2,6 +2,8 @@ package GraduationWorkSalesProject.graduation.com.service;
 
 import java.util.Optional;
 
+import GraduationWorkSalesProject.graduation.com.dto.member.*;
+import GraduationWorkSalesProject.graduation.com.util.RedisUtil;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -9,11 +11,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import GraduationWorkSalesProject.graduation.com.config.jwt.JwtTokenUtil;
-import GraduationWorkSalesProject.graduation.com.dto.member.LoginResponse;
-import GraduationWorkSalesProject.graduation.com.dto.member.MemberJoinRequest;
-import GraduationWorkSalesProject.graduation.com.dto.member.MemberLoginRequest;
-import GraduationWorkSalesProject.graduation.com.dto.member.MemeberProfileEditRequest;
-import GraduationWorkSalesProject.graduation.com.dto.member.MemeberProfileResponse;
 import GraduationWorkSalesProject.graduation.com.entity.member.Member;
 import GraduationWorkSalesProject.graduation.com.exception.JoinInvalidInputException;
 import GraduationWorkSalesProject.graduation.com.exception.LoginInvalidInputException;
@@ -32,6 +29,7 @@ public class MemberService {
     private final MemberRepository memberRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final JwtTokenUtil jwtTokenUtil;
+    private final RedisUtil redisUtil;
     private final JwtUserDetailsService userDetailsService;
 
     @Transactional
@@ -42,8 +40,6 @@ public class MemberService {
         member.encryptPassword(bCryptPasswordEncoder.encode(member.getPassword()));
         memberRepository.save(member);
     }
-
-
 
     private void checkJoinInputsWereVerified(MemberJoinRequest memberJoinRequest) {
         memberRepository.findByUserid(memberJoinRequest.getUserid()).ifPresent(member -> {
@@ -71,19 +67,17 @@ public class MemberService {
         if (!bCryptPasswordEncoder.matches(password, findMember.getPassword()))
             throw new LoginInvalidInputException();
 
-        LoginResponse response = LoginResponse.builder()
+        return LoginResponse.builder()
                 .userid(findMember.getUserid())
                 .username(findMember.getUsername())
                 .email(findMember.getEmail())
                 .phoneNumber(findMember.getPhoneNumber())
-                .imageUrl("test")//findMember.getImage().getImageHref()
+                .imageUrl(findMember.getImage().getImageHref())
                 .joinedDate(findMember.getJoinedDate())
                 .role(findMember.getRole())
                 .certificationStatus(findMember.getCertificationStatus())
                 .address(findMember.getAddress())
                 .build();
-
-        return response;
     }
 
     public Optional<Member> findOneByEmail(String email) {
@@ -105,40 +99,20 @@ public class MemberService {
         memberRepository.deleteByUsername(username);
     }
 
-    @Transactional
-    public String updateRefreshToken(MemberLoginRequest request) {
-        final Member member = memberRepository.findByUserid(request.getUserid()).orElseThrow(UseridNotFoundException::new);
-        final UserDetails userDetails = userDetailsService.loadUserByUsername(member.getUsername());
-        final String refreshToken = jwtTokenUtil.generateRefreshToken(userDetails);
-
-        member.updateRefreshToken(refreshToken);
-        return refreshToken;
-    }
-
-    public String createAccessTokenByUserid(String userid) {
-        final Member member = memberRepository.findByUserid(userid).orElseThrow(UseridNotFoundException::new);
-        final UserDetails userDetails = userDetailsService.loadUserByUsername(member.getUsername());
-        return jwtTokenUtil.generateAccessToken(userDetails);
-    }
-
-    public String createAccessTokenByUsername(String username) {
+    public JwtDTO generateJwts(String username) {
         final UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-        return jwtTokenUtil.generateAccessToken(userDetails);
+        final String accessToken = jwtTokenUtil.generateAccessToken(userDetails);
+        final String refreshToken = jwtTokenUtil.generateRefreshToken(userDetails);
+        redisUtil.set(username, refreshToken, 20160);
+        return new JwtDTO(accessToken, refreshToken);
     }
 
-    private void checkRefreshToken(String refreshToken){
-        final String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        final Member member = memberRepository.findByUsername(username).orElseThrow(UseridNotFoundException::new);
-        if (!member.getRefreshToken().equals(refreshToken))
-            throw new RefreshTokenNotMatchException();
-    }
-
-    public void validateJwts(String accessToken, String refreshToken) {
-        jwtTokenUtil.validateAccessToken(accessToken);
+    public String validateAndDeleteRefreshToken(String refreshToken){
         jwtTokenUtil.validateRefreshToken(refreshToken);
-        checkRefreshToken(refreshToken);
+        final String username = jwtTokenUtil.getUsernameFromRefreshToken(refreshToken);
+        redisUtil.delete(username);
+        return username;
     }
-
 
     /**
      * 회원 정보(전화번호, 주소, 상세주소, 우편번호) 수정하기

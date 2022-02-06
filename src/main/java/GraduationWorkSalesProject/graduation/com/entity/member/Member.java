@@ -18,7 +18,6 @@ import javax.persistence.Table;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import GraduationWorkSalesProject.graduation.com.dto.member.MemeberProfileResponse;
 import GraduationWorkSalesProject.graduation.com.vo.Address;
 import GraduationWorkSalesProject.graduation.com.vo.Image;
 import lombok.AccessLevel;
@@ -77,12 +76,10 @@ public class Member {
     @AttributeOverrides({
             @AttributeOverride(name = "imageName", column = @Column(name = "member_image_name")),
             @AttributeOverride(name = "imageUuid", column = @Column(name = "member_image_uuid")),
-            @AttributeOverride(name = "imageType", column = @Column(name = "member_iamge_Type"))
+            @AttributeOverride(name = "imageType", column = @Column(name = "member_iamge_type")),
+            @AttributeOverride(name = "imageHref", column = @Column(name = "member_iamge_href"))
     })
     private Image image;
-
-    @Column(name = "member_refresh_token")
-    private String refreshToken = null;
 
     @Builder
     public Member(String userid, String email, String password, String username, String phoneNumber,
@@ -106,10 +103,6 @@ public class Member {
         this.password = encryptedPassword;
     }
 
-    public void updateRefreshToken(String refreshToken) {
-        this.refreshToken = refreshToken;
-    }
-
     public void updateRole(MemberRole role) {
         this.role = role;
     }
@@ -117,16 +110,5 @@ public class Member {
     public void updateProfile(String phoneNumber, String address, String detailAddress, String postcode) {
     	this.phoneNumber = phoneNumber;
     	this.address = new Address(address, detailAddress, postcode);
-    }
-
-    public MemeberProfileResponse toMemeberProfileResponse() {
-    	return  MemeberProfileResponse.builder()
-				.userName(this.username)
-				.email(this.email)
-				.address(this.address.getAddress())
-				.detailAddress(this.address.getDetailAddress())
-				.postcode(this.address.getPostcode())
-				.phoneNumber(this.phoneNumber)
-			 	.build();
     }
 }
