@@ -27,6 +27,8 @@ public enum ResultCode {
     CERTIFY_STUDENT_ENROLL_SUCCESS(200, "M113", "회원 학생 인증 등록 성공"),
     CERTIFY_STUDENT_SUCCESS(200, "M114", "회원 학생 인증 성공"),
     CERTIFY_STUDENT_REJECT(200, "M115", "회원 학생 인증 거절"),
+    CHANGE_PROFILE_SUCCESS(200, "M116", "회원 정보 변경 성공"),
+    FIND_PROFILE_SUCCESS(200, "M117", "회원 정보 조회 성공"),
 
     // Product
     PRODUCT_REGISTER_SUCCESS(200, "P100" ,"상품이 성공적으로 등록되었습니다."),
@@ -44,17 +46,19 @@ public enum ResultCode {
     PRODUCT_LIKE_NUM_SUCCESS(200,"P112","상품 좋아요 숫자 불러오기 성공"),
     PRODUCT_DELETE_SUCCESS(200,"P113","상품 삭제 성공"),
     CATEGORY_DELETE_SUCCESS(200,"p114","카테고리 삭제 성공"),
-
-
-
-    CHANGE_PROFILE_SUCCESS(200, "M113", "회원 정보 변경 성공"),
-    FIND_PROFILE_SUCCESS(200, "M114", "회원 정보 조회 성공"),
-
-
+    //Follow
+    FOLLOW_SUCCESS(200, "F100" ,"팔로우 신청 성공"),
+    CHECK_FOLLOWED_MEMBER_SUCCESS(200, "F101" ,"팔로우 여부 조회 성공"),
+    STOP_FOLLOW_SUCCESS(200, "F102" ,"팔로우 취소 성공"),
+    FIND_FOLLOWEDS_SUCCESS(200, "F103" ,"내가 팔로우 한 사람 목록 조회 성공"),
+    FIND_FOLLOWERS_SUCCESS(200, "F104" ,"나를 팔로우 한 사람 목록 조회 성공"),
+    COUNT_FOLLOWEDS_SUCCESS(200, "F105" ,"내가 팔로우 한 사람 수 조회 성공"),
+    COUNT_FOLLOWERS_SUCCESS(200, "F106" ,"나를 팔로우 한 사람 수 조회 성공"),
 	//Seller
-	SELLER_REGISTER_SUCCESS(200, "S100", "판매자 등록에 성공했습니다."),
-	CHANGE_SELLER_INFORMATION_SUCCESS(200, "S100", "판매자 정보 변경에 성공했습니다."),
-	FIND_SELLER_INFORMATION_SUCCESS(200, "S100", "판매자 정보 조회에 성공했습니다.")
+	SELLER_REGISTER_SUCCESS(200, "S100", "판매자 등록에 성공"),
+	CHANGE_SELLER_INFORMATION_SUCCESS(200, "S100", "판매자 정보 변경에 성공"),
+	FIND_SELLER_INFORMATION_SUCCESS(200, "S100", "판매자 정보 조회에 성공")
+
 	;
 
     private int status;
