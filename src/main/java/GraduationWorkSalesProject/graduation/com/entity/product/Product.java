@@ -65,8 +65,6 @@ public class Product {
     @Column(name = "product_delivery_price")
     private int deliveryPrice;
     
-    @OneToMany(mappedBy = "product")
-    private List<Like> likes = new ArrayList<>();;
 
     @Embedded
     @AttributeOverrides({
