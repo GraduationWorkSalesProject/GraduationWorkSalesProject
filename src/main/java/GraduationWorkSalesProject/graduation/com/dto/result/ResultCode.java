@@ -56,8 +56,9 @@ public enum ResultCode {
     COUNT_FOLLOWERS_SUCCESS(200, "F106" ,"나를 팔로우 한 사람 수 조회 성공"),
 	//Seller
 	SELLER_REGISTER_SUCCESS(200, "S100", "판매자 등록에 성공"),
-	CHANGE_SELLER_INFORMATION_SUCCESS(200, "S100", "판매자 정보 변경에 성공"),
-	FIND_SELLER_INFORMATION_SUCCESS(200, "S100", "판매자 정보 조회에 성공")
+	CHANGE_SELLER_INFORMATION_SUCCESS(200, "S101", "판매자 정보 변경에 성공"),
+	FIND_SELLER_INFORMATION_SUCCESS(200, "S102", "판매자 정보 조회에 성공"),
+	FIND_SELLER_PRODUCT_SUCCESS(200, "S103", "판매자의 판매 상품 조회에 성공")
 
 	;
 
